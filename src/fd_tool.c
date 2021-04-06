@@ -73,6 +73,10 @@ int main (int argc, char *argv [])
 
   						if (profile_s)
   							{
+  								const char * const GRASSROOTS_STUDY_RESOURCE_S = "https://grassroots.tools/frictionless_data/profiles/study.json";
+  								const char * const GRASSROOTS_PROGRAMME_RESOURCE_S = "https://grassroots.tools/frictionless_data/profiles/programme.json";
+  								const char * const GRASSROOTS_TRIAL_RESOURCE_S = "https://grassroots.tools/frictionless_data/profiles/trial.json";
+
   								if (strcmp (profile_s, FD_PROFILE_TABULAR_RESOURCE_S) == 0)
   									{
   										const json_t *headers_p = NULL;
@@ -96,9 +100,26 @@ int main (int argc, char *argv [])
 
   											}
 
-
-
   									}		/* if (strcmp (profile_s, FD_PROFILE_TABULAR_RESOURCE_S) == 0) */
+  								else if (strcmp (profile_s, GRASSROOTS_STUDY_RESOURCE_S))
+  									{
+  										/*
+  										 * We have a Study
+  										 */
+  									}
+  								else if (strcmp (profile_s, GRASSROOTS_PROGRAMME_RESOURCE_S))
+  									{
+  										/*
+  										 * We have a Programme
+  										 */
+  									}
+  								else if (strcmp (profile_s, GRASSROOTS_TRIAL_RESOURCE_S))
+  									{
+  										/*
+  										 * We have a Programme
+  										 */
+  									}
+
 
   							}		/* if (profile_s) */
 
