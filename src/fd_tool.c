@@ -236,17 +236,18 @@ static bool CreateCSVFile (const char *filename_s, const char *col_sep_s, const 
 												{
 													const json_t *value_p = json_object_get (row_p, header_s);
 
+													if (add_sep_flag)
+														{
+															fprintf (csv_f, "%s ", col_sep_s);
+														}
+													else
+														{
+															add_sep_flag = true;
+														}
+
+
 													if (value_p)
 														{
-															if (add_sep_flag)
-																{
-																	fprintf (csv_f, "%s ", col_sep_s);
-																}
-															else
-																{
-																	add_sep_flag = true;
-																}
-
 															if (json_is_string (value_p))
 																{
 																	const char *value_s = json_string_value (value_p);
