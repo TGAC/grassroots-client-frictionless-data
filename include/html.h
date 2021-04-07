@@ -23,13 +23,12 @@
 #ifndef CLIENTS_FRICTIONLESS_DATA_INCLUDE_HTML_H_
 #define CLIENTS_FRICTIONLESS_DATA_INCLUDE_HTML_H_
 
+#include <stdio.h>
 
-#include "jansson.h"
-
-#include "typedefs.h"
+#include "printer.h"
 
 
-bool PrintProgrammeToHTML (const json_t *programme_json_p, const char *output_filename_s);
+Printer *AllocateHTMLPrinter (const char *output_filename_s);
 
 
 #endif /* CLIENTS_FRICTIONLESS_DATA_INCLUDE_HTML_H_ */

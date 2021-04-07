@@ -30,10 +30,14 @@ INCLUDES := \
 	-I$(DIR_UUID_INC) \
 	-I$(DIR_GRASSROOTS_NETWORK_INC) \
 	-I$(DIR_GRASSROOTS_SERVER_INC) \
+	-I$(DIR_GRASSROOTS_SERVICES_INC) \
 	-I$(FIELD_TRIAL_INC)
 	
 SRCS 	:= \
 	fd_tool.c \
+	fd_json_util.c \
+	html.c \
+	printer.c \
 	
 LDFLAGS += $(DIR_JANSSON_LIB)/libjansson.a
 
@@ -49,6 +53,9 @@ endif
 	
 
 CPPFLAGS += -DUNIX 
+
+CC := gcc
+CXX :=  gcc
 
 all: exe
 

@@ -33,18 +33,20 @@
 #include "frictionless_data_util.h"
 
 
+#include "printer.h"
+#include "fd_json_util.h"
+
 /*
  * static declarations
  */
-
-static const char *GetJSONString (const json_t *json_p, const char * const key_s);
 
 static bool CreateCSVFile (const char *filename_s, const char *col_sep_s, const char *row_sep_s, const json_t *headers_p, const json_t *data_p);
 
 static const char *GetChildJSONString (const json_t *entry_p, const char * const key_s);
 
-static int PrintJSONObject (FILE *out_f, const json_t * const json_p, const char * const prefix_s);
 
+static int SortPropertiesByOrder (const void *v0_p, const void *v1_p);
+;
 
 /*
  * api definitions
@@ -116,7 +118,7 @@ int main (int argc, char *argv [])
   								else if (strcmp (profile_s, GRASSROOTS_TRIAL_RESOURCE_S))
   									{
   										/*
-  										 * We have a Programme
+  										 * We have a Trial
   										 */
   									}
 
@@ -312,56 +314,91 @@ static bool CreateCSVFile (const char *filename_s, const char *col_sep_s, const 
 
 
 
-static const char *GetJSONString (const json_t *json_p, const char * const key_s)
+
+static bool ParsePackageFromSchema (const json_t *data_p, const json_t *schema_p, Printer *printer_p)
 {
-	const char *value_s = NULL;
-	json_t *value_p = json_object_get (json_p, key_s);
+	bool result = false;
+	const json_t *required_entries_p = json_object_get (schema_p, "required");
+	const json_t *properties_p = json_object_get (schema_p, "propeties_p");
 
-	if (value_p)
+	if (properties_p)
 		{
-			if (json_is_string (value_p))
+			/*
+			 * Get the properties sorted by their propertyOrder values
+			 */
+			const size_t num_properties = json_object_size (properties_p);
+			const char **sorted_keys_pp = calloc (num_properties, sizeof (const char *));
+
+			if (sorted_keys_pp)
 				{
-					value_s = json_string_value (value_p);
-				}
-		}
+					const char *key_s;
+					json_t *value_p;
+					const char **sorted_key_pp = sorted_keys_pp;
+					size_t i = num_properties;
 
-	return value_s;
-}
+					json_object_foreach (properties_p, key_s, value_p)
+						{
+							*sorted_key_pp = key_s;
+							++ sorted_key_pp;
+						}		/* json_object_foreach (properties_p, key_s, value_p) */
 
+					/*
+					 * Sort the keys into order
+					 */
+					qsort (sorted_keys_pp, num_properties, sizeof (const char *), SortPropertiesByOrder);
 
-static int PrintJSONObject (FILE *out_f, const json_t * const json_p, const char * const prefix_s)
-{
-	int result = 0;
-	char *json_s = NULL;
+					/*
+					 * Now read in the values in order
+					 */
+					for (sorted_key_pp = sorted_keys_pp; i > 0; -- i, ++ sorted_key_pp)
+						{
+							const json_t *property_p = json_object_get (properties_p, *sorted_key_pp);
+							const char *type_s = GetJSONString (property_p, FD_TABLE_FIELD_TYPE);
 
-	if (prefix_s)
-		{
-			fprintf (out_f, "%s", prefix_s);
-		}
+							if (type_s)
+								{
+									if (strcmp (type_s, FD_TYPE_STRING) == 0)
+										{
 
-	if (json_p)
-		{
-			json_s = json_dumps (json_p, JSON_INDENT (2));
+										}		/* if (strcmp (type_s, FD_TYPE_STRING) == 0) */
+									else if (strcmp (type_s, FD_TYPE_INTEGER) == 0)
+										{
 
-			if (json_s)
-				{
-					fprintf (out_f, "%s\n", json_s);
-					free (json_s);
-				}
-			else
-				{
-					fprintf (out_f, "ERROR DUMPING!!\n");
-					result = -1;
-				}
-		}
-	else
-		{
-			fprintf (out_f, "NULL JSON OBJECT!!\n");
-		}
+										}		/* else if (strcmp (type_s, FD_TYPE_INTEGER) == 0) */
+									else if (strcmp (type_s, FD_TYPE_NUMBER) == 0)
+										{
 
+										}		/* else if (strcmp (type_s, FD_TYPE_NUMBER) == 0) */
+									else if (strcmp (type_s, FD_TYPE_BOOLEAN) == 0)
+										{
+
+										}		/* else if (strcmp (type_s, FD_TYPE_BOOLEAN) == 0) */
+									else
+										{
+
+										}
+
+								}		/* if (type_s) */
+
+						}		/* for (sorted_key_pp = sorted_keys_pp; i > 0; -- i, ++ sorted_key_pp) */
+
+					free (sorted_keys_pp);
+				}		/* if ((sorted_keys_pp) */
+
+		}		/* if (properties_p) */
 
 	return result;
 }
 
+
+static int SortPropertiesByOrder (const void *v0_p, const void *v1_p)
+{
+	const char **key_0_ss = (const char **) v0_p;
+	const char **key_1_ss = (const char **) v1_p;
+
+	int res = strcmp (*key_0_ss, *key_1_ss);
+
+	return res;
+}
 
 
