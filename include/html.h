@@ -28,7 +28,7 @@
 #include "printer.h"
 
 
-Printer *AllocateHTMLPrinter (const char *output_filename_s);
+Printer *AllocateHTMLPrinter (void);
 
 
 #endif /* CLIENTS_FRICTIONLESS_DATA_INCLUDE_HTML_H_ */

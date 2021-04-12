@@ -40,14 +40,21 @@ typedef struct
  * static declarations
  */
 
-static bool PrintHeader (FILE *out_f, const char *title_s);
+static bool PrintHTMLHeader (Printer *printer_p, const char *title_s);
 
-static bool PrintFooter (FILE *out_f);
+static bool PrintHTMLFooter (Printer *printer_p);
 
 
 static bool PrintHTMLString (Printer *printer_p, const char *key_s, const char *value_s, const bool required_flag, const char *format_s);
+
 static bool PrintHTMLInteger (Printer *printer_p, const char *key_s, const json_int_t value, const bool required_flag, const char *format_s);
+
 static bool PrintHTMLNumber (Printer *printer_p, const char *key_s, const double value, const bool required_flag, const char *format_s);
+
+static bool PrintHTMLBoolean (Printer *printer_p, const char *key_s, const bool value, const bool required_flag, const char *format_s);
+
+static bool PrintHTMLJSON (Printer *printer_p, const char *key_s, const json_t *value_p, const bool required_flag, const char *format_s);
+
 static void FreeHTMLPrinter (Printer *printer_p);
 
 
@@ -56,62 +63,19 @@ static void FreeHTMLPrinter (Printer *printer_p);
  */
 
 
-Printer *AllocateHTMLPrinter (const char *output_filename_s)
+Printer *AllocateHTMLPrinter (void)
 {
-	FILE *out_f = fopen (output_filename_s, "w");
+	HTMLPrinter *printer_p = (HTMLPrinter *) malloc (sizeof (HTMLPrinter));
 
-	if (out_f)
+	if (printer_p)
 		{
-			if (PrintHeader (out_f, "NEED TO ADD TITLE"))
-				{
-					HTMLPrinter *printer_p = (HTMLPrinter *) malloc (sizeof (HTMLPrinter));
+			InitPrinter (& (printer_p -> hp_printer), PrintHTMLHeader, PrintHTMLFooter, PrintHTMLString,
+									 PrintHTMLInteger, PrintHTMLNumber, PrintHTMLInteger, PrintHTMLNumber,  FreeHTMLPrinter);
 
-					if (printer_p)
-						{
-							printer_p -> hp_out_f = out_f;
-
-							InitPrinter (& (printer_p -> hp_printer), PrintHTMLString, PrintHTMLInteger, PrintHTMLNumber, FreeHTMLPrinter);
-
-							return (& (printer_p -> hp_printer));
-						}
-
-					fclose (out_f);
-
-				}
-
+			return (& (printer_p -> hp_printer));
 		}
 
 	return NULL;
-}
-
-
-bool PrintProgrammeToHTML (const json_t *programme_json_p, const char *output_filename_s)
-{
-	bool result = false;
-	FILE *out_f = fopen (output_filename_s, "w");
-
-	if (out_f)
-		{
-			const char *title_s = GetJSONString (programme_json_p, "name");
-
-			if (title_s)
-				{
-					if (PrintHeader (out_f, title_s))
-						{
-
-							if (PrintFooter (out_f))
-								{
-									result = true;
-								}		/* if (PrintFooter (out_f)) */
-
-						}		/* if (PrintHeader (out_f, title_s)) */
-
-				}		/* if (title_s) */
-
-			fclose (out_f);
-		}		/* if (out_f) */
-
-	return result;
 }
 
 
@@ -155,6 +119,31 @@ static bool PrintHTMLNumber (Printer *printer_p, const char *key_s, const double
 }
 
 
+static bool PrintHTMLBoolean (Printer *printer_p, const char *key_s, const bool value, const bool required_flag, const char *format_s)
+{
+	HTMLPrinter *html_printer_p = (HTMLPrinter *) printer_p;
+
+	return (fprintf (html_printer_p -> hp_out_f, "<li><strong>%s</strong>: %s</li>\n", key_s, value ? "true" : "false") > 0);
+}
+
+
+static bool PrintHTMLJSON (Printer *printer_p, const char *key_s, const json_t *value_p, const bool required_flag, const char *format_s)
+{
+	HTMLPrinter *html_printer_p = (HTMLPrinter *) printer_p;
+	bool success_flag = false;
+	char *json_s = json_dumps (value_p, JSON_INDENT (2));
+
+	if (json_s)
+		{
+			success_flag = (fprintf (html_printer_p -> hp_out_f, "<li><strong>%s</strong>: %s</li>\n", key_s, json_s) > 0);
+
+			free (json_s);
+		}		/* if (json_s) */
+
+	return success_flag;
+}
+
+
 static void FreeHTMLPrinter (Printer *printer_p)
 {
 	HTMLPrinter *html_printer_p = (HTMLPrinter *) printer_p;
@@ -171,44 +160,18 @@ static void FreeHTMLPrinter (Printer *printer_p)
 }
 
 
-
-static bool PrintProgrammeHTML (FILE *out_f, const json_t *programme_json_p)
+static bool PrintHTMLHeader (Printer *printer_p, const char *title_s)
 {
-	bool res = false;
-
-	if (fprintf (out_f, "<ul>") > 0)
-		{
-
-			if (fprintf (out_f, "</ul>") > 0)
-				{
-					res = true;
-				}		/* if (fprintf (out_f, "<ul>") > 0) */
-
-		}		/* if (fprintf (out_f, "<ul>") > 0) */
+	bool res = (fprintf (printer_p -> pr_out_f, "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>%s</title>\n</head>\n<body>\n<ul>\n", title_s) > 0);
 
 	return res;
 }
 
 
-static bool PrintHeader (FILE *out_f, const char *title_s)
+static bool PrintHTMLFooter (Printer *printer_p)
 {
-	bool res = (fprintf (out_f, "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>%s</title>\n</head><body><ul>\n", title_s) > 0);
+	bool res = (fprintf (printer_p -> pr_out_f, "</ul>\n</body>\n</html>\n") > 0);
 
 	return res;
 }
 
-
-static bool PrintFooter (FILE *out_f)
-{
-	bool res = (fprintf (out_f, "</ul></body>\n</html>\n") > 0);
-
-	return res;
-}
-
-
-static bool PrintListItem (FILE *out_f, const char *key_s, const char *value_s)
-{
-	bool res = (fprintf (out_f, "<li><strong>%s</strong>: %s</li>\n", key_s, value_s) > 0);
-
-	return res;
-}

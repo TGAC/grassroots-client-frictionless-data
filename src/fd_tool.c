@@ -59,90 +59,174 @@ static bool ParsePackageFromSchema (const json_t *data_p, const json_t *schema_p
 
 int main (int argc, char *argv [])
 {
-  int ret = 0;
-  const char *fd_file_s = argv [1];
-  const char *csv_file_s = argv [2];
-  const char *html_file_s = argv [3];
+	int res = 0;
 
-  Printer *printer_p = AllocateHTMLPrinter (html_file_s);
+	if (argc < 3)
+		{
+			printf (
+					"USAGE: grassroots-fd-tool\n"
+					"\t--in <filename>, the Frictionless Data Package filename to extract the resources from.\n"
+					"\t--out-dir <directory>, the directory where the output files will be written to.\n"
+					"\t--data-fmt <format>, the format to write data resources in. Currently the options are:\n"
+					"\t\thtml: write the files in html format (default).\n"
+					"\t--data-fmt <format>, the format to write data resources in. Currently the options are:\n"
+					"\t\tcsv: write the files in csv format (default).\n"
+					);
 
-  if (printer_p)
-  	{
-  		json_error_t err;
-  	  json_t *fd_p = json_load_file (fd_file_s, 0, &err);
+		}		/* if (argc < 3) */
+	else
+		{
+			int i = 1;
+			const char *fd_file_s = NULL;
+			const char *out_dir_s = NULL;
+			const char *table_format_s = "csv";
+			const char *data_format_s = "html";
 
-  	  if (fd_p)
-  	  	{
-  	  		const json_t *resources_p = json_object_get (fd_p, FD_RESOURCES_S);
+			while (i < argc)
+				{
+					if (strcmp (argv [i], "--in") == 0)
+						{
+							if ((i + 1) < argc)
+								{
+									fd_file_s = argv [++ i];
+								}
+							else
+								{
+									printf ("input argument missing");
+								}
+						}
+					else if (strcmp (argv [i], "--out-dir") == 0)
+						{
+							if ((i + 1) < argc)
+								{
+									out_dir_s = argv [++ i];
+								}
+							else
+								{
+									printf ("output directory argument missing");
+								}
+						}
+					else if (strcmp (argv [i], "--data-fmt") == 0)
+						{
+							if ((i + 1) < argc)
+								{
+									data_format_s = argv [++ i];
+								}
+							else
+								{
+									printf ("data format argument missing");
+								}
+						}
+					else if (strcmp (argv [i], "--table-fmt") == 0)
+						{
+							if ((i + 1) < argc)
+								{
+									table_format_s = argv [++ i];
+								}
+							else
+								{
+									printf ("table format argument missing");
+								}
+						}
+					else
+						{
+							printf ("Unknown argument: \"%s\"", argv [i]);
+						}
 
-  	  		if (resources_p)
-  	  			{
-  	  				size_t i;
-  	  				const json_t *resource_p;
+					++ i;
+				}
 
-  	  				json_array_foreach (resources_p, i, resource_p)
-  							{
-  	  						const char *profile_s = GetJSONString (resource_p, FD_PROFILE_S);
+			if (fd_file_s)
+				{
+				  Printer *printer_p = NULL;
 
-  	  						if (profile_s)
-  	  							{
-  	  								json_t *schema_p = NULL;
+				  if (strcmp (data_format_s, "html") == 0)
+				  	{
+						 	printer_p = AllocateHTMLPrinter ();
+				  	}
 
-  	  								if ((strlen (profile_s) >= 4) && (strncmp (profile_s, "http", 4) == 0))
-  	  									{
-  	  										schema_p = GetWebJSON (profile_s);
+				  if (printer_p)
+				  	{
+				  		json_error_t err;
+				  	  json_t *fd_p = json_load_file (fd_file_s, 0, &err);
 
-  	  										if (schema_p)
-  	  											{
-  	  												ParsePackageFromSchema (resource_p, schema_p, printer_p);
-  	  											}
-  	  									}
-  	  								else if (strcmp (profile_s, FD_PROFILE_TABULAR_RESOURCE_S) == 0)
-  	  									{
-  	  										const json_t *headers_p = NULL;
-  	  										const json_t *data_p = json_object_get (resource_p, FD_DATA_S);
+				  	  if (fd_p)
+				  	  	{
+				  	  		const json_t *resources_p = json_object_get (fd_p, FD_RESOURCES_S);
 
-  	  										if (schema_p)
-  	  											{
-  	  												headers_p = json_object_get (schema_p, FD_TABLE_FIELDS_S);
-  	  											}
+				  	  		if (resources_p)
+				  	  			{
+				  	  				size_t i;
+				  	  				const json_t *resource_p;
 
-  	  										if (data_p)
-  	  											{
-  	  												const char *col_sep_s = ",";
-  	  												const char *row_sep_s = "\n";
+				  	  				json_array_foreach (resources_p, i, resource_p)
+				  							{
+				  	  						const char *profile_s = GetJSONString (resource_p, FD_PROFILE_S);
 
-  	  												if (CreateCSVFile (csv_file_s, col_sep_s, row_sep_s, headers_p, data_p))
-  	  													{
+				  	  						if (profile_s)
+				  	  							{
+				  	  								json_t *schema_p = NULL;
 
-  	  													}
+				  	  								if ((strlen (profile_s) >= 4) && (strncmp (profile_s, "http", 4) == 0))
+				  	  									{
+				  	  										schema_p = GetWebJSON (profile_s);
 
-  	  											}
+				  	  										if (schema_p)
+				  	  											{
+				  	  												ParsePackageFromSchema (resource_p, schema_p, printer_p);
+				  	  											}
+				  	  									}
+				  	  								else if (strcmp (profile_s, FD_PROFILE_TABULAR_RESOURCE_S) == 0)
+				  	  									{
+				  	  										const json_t *headers_p = NULL;
+				  	  										const json_t *data_p = json_object_get (resource_p, FD_DATA_S);
 
-  	  									}		/* if (strcmp (profile_s, FD_PROFILE_TABULAR_RESOURCE_S) == 0) */
+				  	  										if (schema_p)
+				  	  											{
+				  	  												headers_p = json_object_get (schema_p, FD_TABLE_FIELDS_S);
+				  	  											}
 
-  	  							}		/* if (profile_s) */
+				  	  										if (data_p)
+				  	  											{
+				  	  												const char *col_sep_s = ",";
+				  	  												const char *row_sep_s = "\n";
+
+				  	  												if (CreateCSVFile (csv_file_s, col_sep_s, row_sep_s, headers_p, data_p))
+				  	  													{
+
+				  	  													}
+
+				  	  											}
+
+				  	  									}		/* if (strcmp (profile_s, FD_PROFILE_TABULAR_RESOURCE_S) == 0) */
+
+				  	  							}		/* if (profile_s) */
 
 
-  							}		/* json_array_foreach (resources_p, i, resource_p) */
+				  							}		/* json_array_foreach (resources_p, i, resource_p) */
 
-  	  			}		/* if (resources_p) */
-  	  	  else
-  	  	  	{
-  	  	  		fprintf (stderr, "%s does not contain a resources array so nothing to do!\n", fd_file_s);
-  	  	  	}
+				  	  			}		/* if (resources_p) */
+				  	  	  else
+				  	  	  	{
+				  	  	  		fprintf (stderr, "%s does not contain a resources array so nothing to do!\n", fd_file_s);
+				  	  	  	}
 
-  	  		json_decref (fd_p);
-  	  	}		/* if (fd_p) */
-  	  else
-  	  	{
-  	  		fprintf (stderr, "Failed to load %s as a JSON file\n", fd_file_s);
-  	  	}
+				  	  		json_decref (fd_p);
+				  	  	}		/* if (fd_p) */
+				  	  else
+				  	  	{
+				  	  		fprintf (stderr, "Failed to load %s as a JSON file\n", fd_file_s);
+				  	  	}
 
-  		FreePrinter (printer_p);
-  	}		/* if (printer_p) */
 
-  return ret;
+				  		FreePrinter (printer_p);
+				  	}		/* if (printer_p) */
+
+				}		/* if (fd_file_s) */
+
+		}		/* if (argc < 3) else */
+
+  return res;
 }
 
 
@@ -358,7 +442,7 @@ static bool ParsePackageFromSchema (const json_t *data_p, const json_t *schema_p
 
 							if (type_s)
 								{
-									const char *format_s = GetJSONString (property_p, "format");
+									const char *format_s = GetJSONString (property_p, FD_TABLE_FIELD_FORMAT);
 									bool required_flag = false;
 
 									if (required_entries_p)
@@ -388,16 +472,17 @@ static bool ParsePackageFromSchema (const json_t *data_p, const json_t *schema_p
 
 									if (strcmp (type_s, FD_TYPE_STRING) == 0)
 										{
-											const char *value_s = GetJSONString (data_p, *sorted_key_pp);
+											const char *value_s = GetJSONString (data_p, key_s);
 
 											if (value_s)
 												{
-													PrintString (printer_p, *sorted_key_pp, value_s, required_flag, format_s);
+													PrintString (printer_p, key_s, value_s, required_flag, format_s);
 												}
 
 										}		/* if (strcmp (type_s, FD_TYPE_STRING) == 0) */
 									else if (strcmp (type_s, FD_TYPE_INTEGER) == 0)
 										{
+											const char *value_s = GetJSONInteger (data_p, key_s);
 
 										}		/* else if (strcmp (type_s, FD_TYPE_INTEGER) == 0) */
 									else if (strcmp (type_s, FD_TYPE_NUMBER) == 0)
@@ -435,5 +520,4 @@ static int SortPropertiesByOrder (const void *v0_p, const void *v1_p)
 
 	return res;
 }
-
 
