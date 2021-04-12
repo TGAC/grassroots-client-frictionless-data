@@ -122,9 +122,19 @@ bool PrintProgrammeToHTML (const json_t *programme_json_p, const char *output_fi
 
 static bool PrintHTMLString (Printer *printer_p, const char *key_s, const char *value_s, const bool required_flag, const char *format_s)
 {
+	bool success_flag = false;
 	HTMLPrinter *html_printer_p = (HTMLPrinter *) printer_p;
 
-	return (fprintf (html_printer_p -> hp_out_f, "<li><strong>%s</strong>: %s</li>\n", key_s, value_s) > 0);
+	if (required_flag)
+		{
+			success_flag = (fprintf (html_printer_p -> hp_out_f, "<li><strong>%s *</strong>: %s</li>\n", key_s, value_s) > 0);
+		}
+	else
+		{
+			success_flag = (fprintf (html_printer_p -> hp_out_f, "<li><strong>%s</strong>: %s</li>\n", key_s, value_s) > 0);
+		}
+
+	return success_flag;
 }
 
 
@@ -182,7 +192,7 @@ static bool PrintProgrammeHTML (FILE *out_f, const json_t *programme_json_p)
 
 static bool PrintHeader (FILE *out_f, const char *title_s)
 {
-	bool res = (fprintf (out_f, "<html>\n<head>\n\t<title>%s</title>\n</head><body>\n", title_s) > 0);
+	bool res = (fprintf (out_f, "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>%s</title>\n</head><body><ul>\n", title_s) > 0);
 
 	return res;
 }
@@ -190,7 +200,7 @@ static bool PrintHeader (FILE *out_f, const char *title_s)
 
 static bool PrintFooter (FILE *out_f)
 {
-	bool res = (fprintf (out_f, "</body>\n</html>\n") > 0);
+	bool res = (fprintf (out_f, "</ul></body>\n</html>\n") > 0);
 
 	return res;
 }

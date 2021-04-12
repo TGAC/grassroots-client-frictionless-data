@@ -12,6 +12,8 @@ include $(DIR_BUILD_CONFIG)/project.properties
 
 FIELD_TRIAL_INC = $(DIR_BUILD_CONFIG)/../../services/field-trials/include
 
+DIR_CURL_LIB := /usr/lib/x86_64-linux-gnu
+
 
 export DIR_INSTALL=$(DIR_GRASSROOTS_INSTALL)/
 
@@ -28,18 +30,22 @@ INCLUDES := \
 	-I$(DIR_GRASSROOTS_UTIL_INC)/io \
 	-I$(DIR_JANSSON_INC) \
 	-I$(DIR_UUID_INC) \
+	-I$(DIR_BSON_INC) \
 	-I$(DIR_GRASSROOTS_NETWORK_INC) \
 	-I$(DIR_GRASSROOTS_SERVER_INC) \
 	-I$(DIR_GRASSROOTS_SERVICES_INC) \
-	-I$(FIELD_TRIAL_INC)
+	-I$(FIELD_TRIAL_INC) 
 	
 SRCS 	:= \
-	fd_tool.c \
+	fd_byte_buffer.c \
+	fd_curl_util.c \
 	fd_json_util.c \
+	fd_string_util.c \
+	fd_tool.c \
 	html.c \
 	printer.c \
 	
-LDFLAGS += $(DIR_JANSSON_LIB)/libjansson.a
+LDFLAGS += $(DIR_JANSSON_LIB)/libjansson.a -lcurl # $(DIR_CURL_LIB)/libcurl.a
 
 ifeq ($(BUILD),release)
 	CFLAGS 	+= -O3 -s

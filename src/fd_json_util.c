@@ -6,6 +6,25 @@
  */
 
 #include "fd_json_util.h"
+#include "fd_curl_util.h"
+#include "fd_string_util.h"
+
+
+json_t *GetWebJSON (const char *url_s)
+{
+	json_t *data_p = NULL;
+	char *data_s = GetWebData (url_s);
+
+	if (data_s)
+		{
+			json_error_t err;
+			data_p = json_loads (data_s, 0, &err);
+
+			FreeCopiedString (data_s);
+		}
+
+	return data_p;
+}
 
 
 

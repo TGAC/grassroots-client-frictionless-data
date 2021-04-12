@@ -36,6 +36,8 @@
 #include "printer.h"
 #include "fd_json_util.h"
 
+#include "html.h"
+
 /*
  * static declarations
  */
@@ -46,7 +48,10 @@ static const char *GetChildJSONString (const json_t *entry_p, const char * const
 
 
 static int SortPropertiesByOrder (const void *v0_p, const void *v1_p);
-;
+
+static bool ParsePackageFromSchema (const json_t *data_p, const json_t *schema_p, Printer *printer_p);
+
+
 
 /*
  * api definitions
@@ -57,90 +62,85 @@ int main (int argc, char *argv [])
   int ret = 0;
   const char *fd_file_s = argv [1];
   const char *csv_file_s = argv [2];
-	json_error_t err;
-  json_t *fd_p = json_load_file (fd_file_s, 0, &err);
+  const char *html_file_s = argv [3];
 
-  if (fd_p)
+  Printer *printer_p = AllocateHTMLPrinter (html_file_s);
+
+  if (printer_p)
   	{
-  		const json_t *resources_p = json_object_get (fd_p, FD_RESOURCES_S);
+  		json_error_t err;
+  	  json_t *fd_p = json_load_file (fd_file_s, 0, &err);
 
-  		if (resources_p)
-  			{
-  				size_t i;
-  				const json_t *resource_p;
+  	  if (fd_p)
+  	  	{
+  	  		const json_t *resources_p = json_object_get (fd_p, FD_RESOURCES_S);
 
-  				json_array_foreach (resources_p, i, resource_p)
-						{
-  						const char *profile_s = GetJSONString (resource_p, FD_PROFILE_S);
+  	  		if (resources_p)
+  	  			{
+  	  				size_t i;
+  	  				const json_t *resource_p;
 
-  						if (profile_s)
+  	  				json_array_foreach (resources_p, i, resource_p)
   							{
-  								const char * const GRASSROOTS_STUDY_RESOURCE_S = "https://grassroots.tools/frictionless_data/profiles/study.json";
-  								const char * const GRASSROOTS_PROGRAMME_RESOURCE_S = "https://grassroots.tools/frictionless_data/profiles/programme.json";
-  								const char * const GRASSROOTS_TRIAL_RESOURCE_S = "https://grassroots.tools/frictionless_data/profiles/trial.json";
+  	  						const char *profile_s = GetJSONString (resource_p, FD_PROFILE_S);
 
-  								if (strcmp (profile_s, FD_PROFILE_TABULAR_RESOURCE_S) == 0)
-  									{
-  										const json_t *headers_p = NULL;
-  										const json_t *schema_p = json_object_get (resource_p, FD_SCHEMA_S);
-  										const json_t *data_p = json_object_get (resource_p, FD_DATA_S);
+  	  						if (profile_s)
+  	  							{
+  	  								json_t *schema_p = NULL;
 
-  										if (schema_p)
-  											{
-  												headers_p = json_object_get (schema_p, FD_TABLE_FIELDS_S);
-  											}
+  	  								if ((strlen (profile_s) >= 4) && (strncmp (profile_s, "http", 4) == 0))
+  	  									{
+  	  										schema_p = GetWebJSON (profile_s);
 
-  										if (data_p)
-  											{
-  												const char *col_sep_s = ",";
-  												const char *row_sep_s = "\n";
+  	  										if (schema_p)
+  	  											{
+  	  												ParsePackageFromSchema (resource_p, schema_p, printer_p);
+  	  											}
+  	  									}
+  	  								else if (strcmp (profile_s, FD_PROFILE_TABULAR_RESOURCE_S) == 0)
+  	  									{
+  	  										const json_t *headers_p = NULL;
+  	  										const json_t *data_p = json_object_get (resource_p, FD_DATA_S);
 
-  												if (CreateCSVFile (csv_file_s, col_sep_s, row_sep_s, headers_p, data_p))
-  													{
+  	  										if (schema_p)
+  	  											{
+  	  												headers_p = json_object_get (schema_p, FD_TABLE_FIELDS_S);
+  	  											}
 
-  													}
+  	  										if (data_p)
+  	  											{
+  	  												const char *col_sep_s = ",";
+  	  												const char *row_sep_s = "\n";
 
-  											}
+  	  												if (CreateCSVFile (csv_file_s, col_sep_s, row_sep_s, headers_p, data_p))
+  	  													{
 
-  									}		/* if (strcmp (profile_s, FD_PROFILE_TABULAR_RESOURCE_S) == 0) */
-  								else if (strcmp (profile_s, GRASSROOTS_STUDY_RESOURCE_S))
-  									{
-  										/*
-  										 * We have a Study
-  										 */
-  									}
-  								else if (strcmp (profile_s, GRASSROOTS_PROGRAMME_RESOURCE_S))
-  									{
-  										/*
-  										 * We have a Programme
-  										 */
-  									}
-  								else if (strcmp (profile_s, GRASSROOTS_TRIAL_RESOURCE_S))
-  									{
-  										/*
-  										 * We have a Trial
-  										 */
-  									}
+  	  													}
+
+  	  											}
+
+  	  									}		/* if (strcmp (profile_s, FD_PROFILE_TABULAR_RESOURCE_S) == 0) */
+
+  	  							}		/* if (profile_s) */
 
 
-  							}		/* if (profile_s) */
+  							}		/* json_array_foreach (resources_p, i, resource_p) */
 
+  	  			}		/* if (resources_p) */
+  	  	  else
+  	  	  	{
+  	  	  		fprintf (stderr, "%s does not contain a resources array so nothing to do!\n", fd_file_s);
+  	  	  	}
 
-						}		/* json_array_foreach (resources_p, i, resource_p) */
-
-  			}		/* if (resources_p) */
+  	  		json_decref (fd_p);
+  	  	}		/* if (fd_p) */
   	  else
   	  	{
-  	  		fprintf (stderr, "%s does not contain a resources array so nothing to do!\n", fd_file_s);
+  	  		fprintf (stderr, "Failed to load %s as a JSON file\n", fd_file_s);
   	  	}
 
-  		json_decref (fd_p);
-  	}		/* if (fd_p) */
-  else
-  	{
-  		fprintf (stderr, "Failed to load %s as a JSON file\n", fd_file_s);
-  	}
-
+  		FreePrinter (printer_p);
+  	}		/* if (printer_p) */
 
   return ret;
 }
@@ -319,7 +319,7 @@ static bool ParsePackageFromSchema (const json_t *data_p, const json_t *schema_p
 {
 	bool result = false;
 	const json_t *required_entries_p = json_object_get (schema_p, "required");
-	const json_t *properties_p = json_object_get (schema_p, "propeties_p");
+	const json_t *properties_p = json_object_get (schema_p, "properties");
 
 	if (properties_p)
 		{
@@ -352,13 +352,48 @@ static bool ParsePackageFromSchema (const json_t *data_p, const json_t *schema_p
 					 */
 					for (sorted_key_pp = sorted_keys_pp; i > 0; -- i, ++ sorted_key_pp)
 						{
-							const json_t *property_p = json_object_get (properties_p, *sorted_key_pp);
+							const char * const key_s = *sorted_key_pp;
+							const json_t *property_p = json_object_get (properties_p, key_s);
 							const char *type_s = GetJSONString (property_p, FD_TABLE_FIELD_TYPE);
 
 							if (type_s)
 								{
+									const char *format_s = GetJSONString (property_p, "format");
+									bool required_flag = false;
+
+									if (required_entries_p)
+										{
+											size_t num_required_entries = json_array_size (required_entries_p);
+											size_t j = 0;
+
+											for (j = 0; j < num_required_entries; ++ j)
+												{
+													json_t *entry_p = json_array_get (required_entries_p, j);
+
+													if (json_is_string (entry_p))
+														{
+															const char *req_s = json_string_value (entry_p);
+
+															if (strcmp (key_s, req_s) == 0)
+																{
+																	required_flag = true;
+																	j = num_required_entries;
+																}
+
+														}
+												}
+
+										}
+
+
 									if (strcmp (type_s, FD_TYPE_STRING) == 0)
 										{
+											const char *value_s = GetJSONString (data_p, *sorted_key_pp);
+
+											if (value_s)
+												{
+													PrintString (printer_p, *sorted_key_pp, value_s, required_flag, format_s);
+												}
 
 										}		/* if (strcmp (type_s, FD_TYPE_STRING) == 0) */
 									else if (strcmp (type_s, FD_TYPE_INTEGER) == 0)
