@@ -12,7 +12,12 @@
 
 #include "jansson.h"
 
+#include "typedefs.h"
+
 const char *GetJSONString (const json_t *json_p, const char * const key_s);
+
+bool GetJSONInteger (const json_t *json_p, const char * const key_s, int *value_p);
+
 
 int PrintJSONObject (FILE *out_f, const json_t * const json_p, const char * const prefix_s);
 

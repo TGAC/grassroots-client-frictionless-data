@@ -148,13 +148,10 @@ static void FreeHTMLPrinter (Printer *printer_p)
 {
 	HTMLPrinter *html_printer_p = (HTMLPrinter *) printer_p;
 
-	if (html_printer_p -> hp_out_f)
+	if (printer_p -> pr_out_f)
 		{
-			PrintFooter (html_printer_p -> hp_out_f);
-
-			fclose (html_printer_p -> hp_out_f);
+			ClosePrinter (printer_p);
 		}
-
 
 	free (html_printer_p);
 }

@@ -10,6 +10,9 @@
 #include "fd_string_util.h"
 
 
+static bool SetIntegerFromJSON (const json_t *json_p, int32 *value_p);
+
+
 json_t *GetWebJSON (const char *url_s)
 {
 	json_t *data_p = NULL;
@@ -46,6 +49,19 @@ const char *GetJSONString (const json_t *json_p, const char * const key_s)
 
 
 
+bool GetJSONInteger (const json_t *json_p, const char * const key_s, int *value_p)
+{
+	bool success_flag = false;
+	json_t *json_value_p = json_object_get (json_p, key_s);
+
+	if (json_value_p)
+		{
+			success_flag = SetIntegerFromJSON (json_value_p, value_p);
+		}
+
+	return success_flag;
+}
+
 
 int PrintJSONObject (FILE *out_f, const json_t * const json_p, const char * const prefix_s)
 {
@@ -79,5 +95,23 @@ int PrintJSONObject (FILE *out_f, const json_t * const json_p, const char * cons
 
 
 	return result;
+}
+
+
+static bool SetIntegerFromJSON (const json_t *json_p, int32 *value_p)
+{
+	bool success_flag = false;
+
+	if (json_is_integer (json_p))
+		{
+			*value_p = json_integer_value (json_p);
+			success_flag = true;
+		}
+	else
+		{
+			printf ("JSON value is of the wrong type, %d not integer", json_p -> type);
+		}
+
+	return success_flag;
 }
 

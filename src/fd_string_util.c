@@ -295,6 +295,23 @@ char *ConcatenateStrings (const char * const first_s, const char * const second_
 
 
 
+char *ConvertSizeTToString (const size_t value)
+{
+	int num_chars = snprintf (NULL, 0, "%zu", value);
+	char *value_s = NULL;
+
+	++ num_chars;
+
+	value_s = (char *) AllocMemory (num_chars * sizeof (char));
+
+	if (value_s)
+		{
+			num_chars = snprintf (value_s, num_chars, "%zu", value);
+		}
+
+	return value_s;
+}
+
 
 
 /**

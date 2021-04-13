@@ -228,6 +228,12 @@ char *ConcatenateVarargsStrings (const char *value_s, ...);
 
 
 
+char *ConcatenateStrings (const char * const first_s, const char * const second_s);
+
+
+
+char *ConvertSizeTToString (const size_t value);
+
 
 /**
  * Test whether a given string contains any whitespace characters.

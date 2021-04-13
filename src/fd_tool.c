@@ -35,6 +35,8 @@
 
 #include "printer.h"
 #include "fd_json_util.h"
+#include "fd_string_util.h"
+#include <fd_filesystem_util.h>
 
 #include "html.h"
 
@@ -51,6 +53,7 @@ static int SortPropertiesByOrder (const void *v0_p, const void *v1_p);
 
 static bool ParsePackageFromSchema (const json_t *data_p, const json_t *schema_p, Printer *printer_p);
 
+static char *GetOutputFilename (const char *dir_s, const char *name_s, const char *extension_s);
 
 
 /*
@@ -156,16 +159,22 @@ int main (int argc, char *argv [])
 
 				  	  		if (resources_p)
 				  	  			{
-				  	  				size_t i;
+				  	  				size_t j;
 				  	  				const json_t *resource_p;
 
-				  	  				json_array_foreach (resources_p, i, resource_p)
+				  	  				json_array_foreach (resources_p, j, resource_p)
 				  							{
+
 				  	  						const char *profile_s = GetJSONString (resource_p, FD_PROFILE_S);
 
 				  	  						if (profile_s)
 				  	  							{
 				  	  								json_t *schema_p = NULL;
+						  	  						const char *name_s = GetJSONString (resource_p, FD_NAME_S);
+						  	  						char *filename_s = NULL;
+
+
+
 
 				  	  								if ((strlen (profile_s) >= 4) && (strncmp (profile_s, "http", 4) == 0))
 				  	  									{
@@ -173,8 +182,36 @@ int main (int argc, char *argv [])
 
 				  	  										if (schema_p)
 				  	  											{
-				  	  												ParsePackageFromSchema (resource_p, schema_p, printer_p);
-				  	  											}
+				  					  	  						if (name_s)
+				  					  	  							{
+				  					  	  								filename_s = GetOutputFilename (out_dir_s, name_s, data_format_s);
+				  					  	  							}		/* if (name_s) */
+				  					  	  						else
+				  					  	  							{
+				  					  	  								char *temp_s = ConvertSizeTToString (j);
+
+				  					  	  								if (temp_s)
+				  					  	  									{
+				  					  	  										filename_s = GetOutputFilename (out_dir_s, temp_s, data_format_s);
+				  					  	  										FreeCopiedString (temp_s);
+				  					  	  									}
+
+				  					  	  							}
+
+				  					  	  						if (filename_s)
+				  					  	  							{
+				  					  	  								if (OpenPrinter (printer_p, filename_s))
+				  					  	  									{
+								  	  												ParsePackageFromSchema (resource_p, schema_p, printer_p);
+
+				  					  	  										ClosePrinter (printer_p);
+				  					  	  									}		/* if (OpenPrinter (printer_p, filename_s)) */
+
+
+				  							  	  						FreeCopiedString (filename_s);
+				  					  	  							}		/* if (filename_s) */
+
+				  	  											}		/* if (schema_p) */
 				  	  									}
 				  	  								else if (strcmp (profile_s, FD_PROFILE_TABULAR_RESOURCE_S) == 0)
 				  	  									{
@@ -191,10 +228,32 @@ int main (int argc, char *argv [])
 				  	  												const char *col_sep_s = ",";
 				  	  												const char *row_sep_s = "\n";
 
-				  	  												if (CreateCSVFile (csv_file_s, col_sep_s, row_sep_s, headers_p, data_p))
-				  	  													{
+				  					  	  						if (name_s)
+				  					  	  							{
+				  					  	  								filename_s = GetOutputFilename (out_dir_s, name_s, table_format_s);
+				  					  	  							}		/* if (name_s) */
+				  					  	  						else
+				  					  	  							{
+				  					  	  								char *temp_s = ConvertSizeTToString (j);
 
-				  	  													}
+				  					  	  								if (temp_s)
+				  					  	  									{
+				  					  	  										filename_s = GetOutputFilename (out_dir_s, temp_s, table_format_s);
+				  					  	  										FreeCopiedString (temp_s);
+				  					  	  									}
+
+				  					  	  							}
+
+				  					  	  						if (filename_s)
+				  					  	  							{
+						  	  												if (CreateCSVFile (filename_s, col_sep_s, row_sep_s, headers_p, data_p))
+						  	  													{
+
+						  	  													}
+
+				  							  	  						FreeCopiedString (filename_s);
+				  					  	  							}		/* if (filename_s) */
+
 
 				  	  											}
 
@@ -436,9 +495,13 @@ static bool ParsePackageFromSchema (const json_t *data_p, const json_t *schema_p
 					 */
 					for (sorted_key_pp = sorted_keys_pp; i > 0; -- i, ++ sorted_key_pp)
 						{
-							const char * const key_s = *sorted_key_pp;
-							const json_t *property_p = json_object_get (properties_p, key_s);
-							const char *type_s = GetJSONString (property_p, FD_TABLE_FIELD_TYPE);
+							const json_t *property_p;
+							const char *type_s;
+
+							key_s = *sorted_key_pp;
+
+							property_p = json_object_get (properties_p, key_s);
+							type_s = GetJSONString (property_p, FD_TABLE_FIELD_TYPE);
 
 							if (type_s)
 								{
@@ -482,7 +545,12 @@ static bool ParsePackageFromSchema (const json_t *data_p, const json_t *schema_p
 										}		/* if (strcmp (type_s, FD_TYPE_STRING) == 0) */
 									else if (strcmp (type_s, FD_TYPE_INTEGER) == 0)
 										{
-											const char *value_s = GetJSONInteger (data_p, key_s);
+											int value;
+
+											if (GetJSONInteger (data_p, key_s, &value))
+												{
+													PrintInteger (printer_p, key_s, value, required_flag, format_s);
+												}
 
 										}		/* else if (strcmp (type_s, FD_TYPE_INTEGER) == 0) */
 									else if (strcmp (type_s, FD_TYPE_NUMBER) == 0)
@@ -520,4 +588,49 @@ static int SortPropertiesByOrder (const void *v0_p, const void *v1_p)
 
 	return res;
 }
+
+
+static char *GetOutputFilename (const char *dir_s, const char *name_s, const char *extension_s)
+{
+	char *filename_s = NULL;
+	char *copied_name_s = ConcatenateVarargsStrings (name_s, ".", extension_s, NULL);
+
+	if (copied_name_s)
+		{
+			/*
+			 * Replace any non file-system characters to
+			 * make sure that it is a valid filename.
+			 * The safest approach is to replace all
+			 * non-alphanumeric characters with an
+			 * underscore.
+			 */
+			char *c_p = copied_name_s;
+
+			while (*c_p != '\0')
+				{
+					if (isalnum (*c_p) == 0)
+						{
+							*c_p = '_';
+						}
+
+					++ c_p;
+				}
+
+			if (dir_s)
+				{
+					filename_s = MakeFilename (dir_s, copied_name_s);
+
+					FreeCopiedString (copied_name_s);
+				}		/* if (dir_s) */
+			else
+				{
+					filename_s = copied_name_s;
+				}
+
+		}		/* if (copied_name_s) */
+
+	return filename_s;
+}
+
+
 

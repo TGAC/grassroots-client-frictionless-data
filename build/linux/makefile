@@ -19,8 +19,11 @@ export DIR_INSTALL=$(DIR_GRASSROOTS_INSTALL)/
 
 BUILD		:= debug
 
+PLATFORM := unix
+
 VPATH	:= \
-	$(DIR_SRC) 
+	$(DIR_SRC) \
+	$(DIR_SRC)/os
 	
 
 INCLUDES := \
@@ -39,12 +42,21 @@ INCLUDES := \
 SRCS 	:= \
 	fd_byte_buffer.c \
 	fd_curl_util.c \
+	fd_filesystem_util.c \
 	fd_json_util.c \
 	fd_string_util.c \
 	fd_tool.c \
 	html.c \
 	printer.c \
-	
+
+ifeq ($(PLATFORM),unix)
+	SRCS += unix_filesystem.c 
+else ifeq ($(PLATFORM),windows)
+	SRCS += windows_filesystem.c 
+else ifeq ($(PLATFORM),amiga)
+	SRCS += amiga_filesystem.c 	
+endif
+
 LDFLAGS += $(DIR_JANSSON_LIB)/libjansson.a -lcurl # $(DIR_CURL_LIB)/libcurl.a
 
 ifeq ($(BUILD),release)
