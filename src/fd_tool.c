@@ -40,20 +40,26 @@
 
 #include "html.h"
 
+
+typedef struct
+{
+	const char *jp_key_s;
+	const json_t *jp_value_p;
+} JSONProperty;
+
+
 /*
  * static declarations
  */
 
 static bool CreateCSVFile (const char *filename_s, const char *col_sep_s, const char *row_sep_s, const json_t *headers_p, const json_t *data_p);
 
-static const char *GetChildJSONString (const json_t *entry_p, const char * const key_s);
 
 
 static int SortPropertiesByOrder (const void *v0_p, const void *v1_p);
 
-static bool ParsePackageFromSchema (const json_t *data_p, const json_t *schema_p, Printer *printer_p);
+static bool ParsePackageFromSchema (const json_t *data_p, const json_t *schema_p, Printer *printer_p, const bool full_flag);
 
-static char *GetOutputFilename (const char *dir_s, const char *name_s, const char *extension_s);
 
 
 /*
@@ -71,9 +77,10 @@ int main (int argc, char *argv [])
 					"\t--in <filename>, the Frictionless Data Package filename to extract the resources from.\n"
 					"\t--out-dir <directory>, the directory where the output files will be written to.\n"
 					"\t--data-fmt <format>, the format to write data resources in. Currently the options are:\n"
-					"\t\thtml: write the files in html format (default).\n"
+					"\t\thtml, write the files in html format (default).\n"
 					"\t--data-fmt <format>, the format to write data resources in. Currently the options are:\n"
-					"\t\tcsv: write the files in csv format (default).\n"
+					"\t\tcsv, write the files in csv format (default).\n"
+					"\t--full, show all properties even when the values are empty"
 					);
 
 		}		/* if (argc < 3) */
@@ -84,6 +91,7 @@ int main (int argc, char *argv [])
 			const char *out_dir_s = NULL;
 			const char *table_format_s = "csv";
 			const char *data_format_s = "html";
+			bool full_flag = false;
 
 			while (i < argc)
 				{
@@ -131,6 +139,10 @@ int main (int argc, char *argv [])
 									printf ("table format argument missing");
 								}
 						}
+					else if (strcmp (argv [i], "--full") == 0)
+						{
+							full_flag = true;
+						}
 					else
 						{
 							printf ("Unknown argument: \"%s\"", argv [i]);
@@ -169,16 +181,13 @@ int main (int argc, char *argv [])
 
 				  	  						if (profile_s)
 				  	  							{
-				  	  								json_t *schema_p = NULL;
 						  	  						const char *name_s = GetJSONString (resource_p, FD_NAME_S);
 						  	  						char *filename_s = NULL;
 
 
-
-
-				  	  								if ((strlen (profile_s) >= 4) && (strncmp (profile_s, "http", 4) == 0))
+				  	  								if (DoesStringStartWith (profile_s, "http"))
 				  	  									{
-				  	  										schema_p = GetWebJSON (profile_s);
+				  	  										json_t *schema_p = GetWebJSON (profile_s);
 
 				  	  										if (schema_p)
 				  	  											{
@@ -202,8 +211,11 @@ int main (int argc, char *argv [])
 				  					  	  							{
 				  					  	  								if (OpenPrinter (printer_p, filename_s))
 				  					  	  									{
-								  	  												ParsePackageFromSchema (resource_p, schema_p, printer_p);
+				  					  	  										PrintHeader (printer_p, name_s, NULL);
+								  	  												ParsePackageFromSchema (resource_p, schema_p, printer_p, full_flag);
 
+
+				  					  	  										PrintFooter (printer_p, profile_s);
 				  					  	  										ClosePrinter (printer_p);
 				  					  	  									}		/* if (OpenPrinter (printer_p, filename_s)) */
 
@@ -215,8 +227,9 @@ int main (int argc, char *argv [])
 				  	  									}
 				  	  								else if (strcmp (profile_s, FD_PROFILE_TABULAR_RESOURCE_S) == 0)
 				  	  									{
-				  	  										const json_t *headers_p = NULL;
+						  	  								const json_t *schema_p = json_object_get (resource_p, FD_SCHEMA_S);
 				  	  										const json_t *data_p = json_object_get (resource_p, FD_DATA_S);
+				  	  										const json_t *headers_p = NULL;
 
 				  	  										if (schema_p)
 				  	  											{
@@ -293,25 +306,6 @@ int main (int argc, char *argv [])
  * static definitions
  */
 
-static const char *GetChildJSONString (const json_t *entry_p, const char * const key_s)
-{
-	const char *value_s = NULL;
-	const json_t *header_name_p = json_object_get (entry_p, key_s);
-
-	if (header_name_p)
-		{
-			if (json_is_string (header_name_p))
-				{
-					value_s = json_string_value (header_name_p);
-				}
-			else
-				{
-					PrintJSONObject (stderr, entry_p, "header for %s is not a string");
-				}
-		}
-
-	return value_s;
-}
 
 
 static bool CreateCSVFile (const char *filename_s, const char *col_sep_s, const char *row_sep_s, const json_t *headers_p, const json_t *data_p)
@@ -335,7 +329,7 @@ static bool CreateCSVFile (const char *filename_s, const char *col_sep_s, const 
 					for (i = 0; i < num_columns; ++ i)
 						{
 							const json_t *header_p = json_array_get (headers_p, i);
-							const char *header_s = GetChildJSONString (header_p, FD_TABLE_FIELD_NAME);
+							const char *header_s = GetJSONString (header_p, FD_TABLE_FIELD_NAME);
 
 							if (header_s)
 								{
@@ -375,7 +369,7 @@ static bool CreateCSVFile (const char *filename_s, const char *col_sep_s, const 
 									for (j = 0; j < num_columns; ++ j)
 										{
 											const json_t *header_p = json_array_get (headers_p, j);
-											const char *header_s = GetChildJSONString (header_p, FD_TABLE_FIELD_NAME);
+											const char *header_s = GetJSONString (header_p, FD_TABLE_FIELD_NAME);
 
 											if (header_s)
 												{
@@ -458,7 +452,7 @@ static bool CreateCSVFile (const char *filename_s, const char *col_sep_s, const 
 
 
 
-static bool ParsePackageFromSchema (const json_t *data_p, const json_t *schema_p, Printer *printer_p)
+static bool ParsePackageFromSchema (const json_t *data_p, const json_t *schema_p, Printer *printer_p, const bool full_flag)
 {
 	bool result = false;
 	const json_t *required_entries_p = json_object_get (schema_p, "required");
@@ -466,41 +460,43 @@ static bool ParsePackageFromSchema (const json_t *data_p, const json_t *schema_p
 
 	if (properties_p)
 		{
+
 			/*
 			 * Get the properties sorted by their propertyOrder values
 			 */
 			const size_t num_properties = json_object_size (properties_p);
-			const char **sorted_keys_pp = calloc (num_properties, sizeof (const char *));
+			JSONProperty *sorted_properties_p = calloc (num_properties, sizeof (JSONProperty));
 
-			if (sorted_keys_pp)
+			if (sorted_properties_p)
 				{
 					const char *key_s;
 					json_t *value_p;
-					const char **sorted_key_pp = sorted_keys_pp;
+					JSONProperty *sorted_property_p = sorted_properties_p;
 					size_t i = num_properties;
 
 					json_object_foreach (properties_p, key_s, value_p)
 						{
-							*sorted_key_pp = key_s;
-							++ sorted_key_pp;
+							sorted_property_p -> jp_key_s = key_s;
+							sorted_property_p -> jp_value_p = value_p;
+
+							++ sorted_property_p;
 						}		/* json_object_foreach (properties_p, key_s, value_p) */
 
 					/*
 					 * Sort the keys into order
 					 */
-					qsort (sorted_keys_pp, num_properties, sizeof (const char *), SortPropertiesByOrder);
+					qsort (sorted_properties_p, num_properties, sizeof (JSONProperty), SortPropertiesByOrder);
 
 					/*
 					 * Now read in the values in order
 					 */
-					for (sorted_key_pp = sorted_keys_pp; i > 0; -- i, ++ sorted_key_pp)
+					for (sorted_property_p = sorted_properties_p; i > 0; -- i, ++ sorted_property_p)
 						{
-							const json_t *property_p;
+							const json_t *property_p = sorted_property_p -> jp_value_p;
 							const char *type_s;
 
-							key_s = *sorted_key_pp;
+							key_s = sorted_property_p -> jp_key_s;
 
-							property_p = json_object_get (properties_p, key_s);
 							type_s = GetJSONString (property_p, FD_TABLE_FIELD_TYPE);
 
 							if (type_s)
@@ -537,28 +533,72 @@ static bool ParsePackageFromSchema (const json_t *data_p, const json_t *schema_p
 										{
 											const char *value_s = GetJSONString (data_p, key_s);
 
-											if (value_s)
+											if (value_s || full_flag)
 												{
+													/*
+													 * profiles may be a url so check for this
+													 */
+													if ((strcmp (key_s, FD_PROFILE_S) == 0) && (DoesStringStartWith (value_s, "http")))
+														{
+															format_s = FD_TYPE_STRING_FORMAT_URI;
+														}
+
 													PrintString (printer_p, key_s, value_s, required_flag, format_s);
 												}
 
 										}		/* if (strcmp (type_s, FD_TYPE_STRING) == 0) */
 									else if (strcmp (type_s, FD_TYPE_INTEGER) == 0)
 										{
-											int value;
+											bool print_flag = full_flag;
+											json_int_t value;
+											json_int_t *int_value_p = NULL;
 
 											if (GetJSONInteger (data_p, key_s, &value))
 												{
-													PrintInteger (printer_p, key_s, value, required_flag, format_s);
+													int_value_p = &value;
+													print_flag = true;
+												}
+
+											if (print_flag)
+												{
+													PrintInteger (printer_p, key_s, int_value_p, required_flag, format_s);
 												}
 
 										}		/* else if (strcmp (type_s, FD_TYPE_INTEGER) == 0) */
 									else if (strcmp (type_s, FD_TYPE_NUMBER) == 0)
 										{
+											bool print_flag = full_flag;
+											double value;
+											double *number_value_p = NULL;
+
+											if (GetJSONNumber (data_p, key_s, &value))
+												{
+													number_value_p = &value;
+													print_flag = true;
+												}
+
+											if (print_flag)
+												{
+													PrintNumber (printer_p, key_s, number_value_p, required_flag, format_s);
+												}
 
 										}		/* else if (strcmp (type_s, FD_TYPE_NUMBER) == 0) */
 									else if (strcmp (type_s, FD_TYPE_BOOLEAN) == 0)
 										{
+											bool print_flag = full_flag;
+											bool value;
+											bool *bool_value_p = NULL;
+
+											if (GetJSONBoolean (data_p, key_s, &value))
+												{
+													bool_value_p = &value;
+													print_flag = true;
+												}
+
+											if (print_flag)
+												{
+													PrintBoolean (printer_p, key_s, bool_value_p, required_flag, format_s);
+												}
 
 										}		/* else if (strcmp (type_s, FD_TYPE_BOOLEAN) == 0) */
 									else
@@ -570,7 +610,7 @@ static bool ParsePackageFromSchema (const json_t *data_p, const json_t *schema_p
 
 						}		/* for (sorted_key_pp = sorted_keys_pp; i > 0; -- i, ++ sorted_key_pp) */
 
-					free (sorted_keys_pp);
+					free (sorted_properties_p);
 				}		/* if ((sorted_keys_pp) */
 
 		}		/* if (properties_p) */
@@ -581,56 +621,22 @@ static bool ParsePackageFromSchema (const json_t *data_p, const json_t *schema_p
 
 static int SortPropertiesByOrder (const void *v0_p, const void *v1_p)
 {
-	const char **key_0_ss = (const char **) v0_p;
-	const char **key_1_ss = (const char **) v1_p;
+	int res = 0;
+	const JSONProperty *json_0_p = (const JSONProperty *) v0_p;
+	const JSONProperty *json_1_p = (const JSONProperty *) v1_p;
 
-	int res = strcmp (*key_0_ss, *key_1_ss);
+	int prop_order_0;
+
+	if (GetJSONInteger (json_0_p -> jp_value_p, FD_PROFILE_PROPERTY_ORDER_S, &prop_order_0))
+		{
+			int prop_order_1;
+
+			if (GetJSONInteger (json_1_p -> jp_value_p, FD_PROFILE_PROPERTY_ORDER_S, &prop_order_1))
+				{
+					res = prop_order_0 - prop_order_1;
+				}
+
+		}
 
 	return res;
 }
-
-
-static char *GetOutputFilename (const char *dir_s, const char *name_s, const char *extension_s)
-{
-	char *filename_s = NULL;
-	char *copied_name_s = ConcatenateVarargsStrings (name_s, ".", extension_s, NULL);
-
-	if (copied_name_s)
-		{
-			/*
-			 * Replace any non file-system characters to
-			 * make sure that it is a valid filename.
-			 * The safest approach is to replace all
-			 * non-alphanumeric characters with an
-			 * underscore.
-			 */
-			char *c_p = copied_name_s;
-
-			while (*c_p != '\0')
-				{
-					if (isalnum (*c_p) == 0)
-						{
-							*c_p = '_';
-						}
-
-					++ c_p;
-				}
-
-			if (dir_s)
-				{
-					filename_s = MakeFilename (dir_s, copied_name_s);
-
-					FreeCopiedString (copied_name_s);
-				}		/* if (dir_s) */
-			else
-				{
-					filename_s = copied_name_s;
-				}
-
-		}		/* if (copied_name_s) */
-
-	return filename_s;
-}
-
-
-

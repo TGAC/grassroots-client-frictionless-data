@@ -16,8 +16,11 @@
 
 const char *GetJSONString (const json_t *json_p, const char * const key_s);
 
-bool GetJSONInteger (const json_t *json_p, const char * const key_s, int *value_p);
+bool GetJSONInteger (const json_t *json_p, const char * const key_s, json_int_t *value_p);
 
+bool GetJSONNumber (const json_t *json_p, const char * const key_s, double *value_p);
+
+bool GetJSONBoolean (const json_t *json_p, const char * const key_s, bool *value_p);
 
 int PrintJSONObject (FILE *out_f, const json_t * const json_p, const char * const prefix_s);
 

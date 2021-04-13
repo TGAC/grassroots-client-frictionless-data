@@ -245,6 +245,9 @@ char *ConvertSizeTToString (const size_t value);
 bool DoesStringContainWhitespace (const char *value_s);
 
 
+bool DoesStringStartWith (const char *value_s, const char *start_s);
+
+
 bool DoesStringEndWith (const char *value_s, const char *ending_s);
 
 

@@ -26,13 +26,12 @@
 
 #include "fd_json_util.h"
 
+#include "frictionless_data_util.h"
 
 
 typedef struct
 {
 	Printer hp_printer;
-
-	FILE *hp_out_f;
 } HTMLPrinter;
 
 
@@ -40,22 +39,24 @@ typedef struct
  * static declarations
  */
 
-static bool PrintHTMLHeader (Printer *printer_p, const char *title_s);
+static bool PrintHTMLHeader (Printer *printer_p, const char *title_s, const char *text_s);
 
-static bool PrintHTMLFooter (Printer *printer_p);
+static bool PrintHTMLFooter (Printer *printer_p, const char *text_s);
 
 
 static bool PrintHTMLString (Printer *printer_p, const char *key_s, const char *value_s, const bool required_flag, const char *format_s);
 
-static bool PrintHTMLInteger (Printer *printer_p, const char *key_s, const json_int_t value, const bool required_flag, const char *format_s);
+static bool PrintHTMLInteger (Printer *printer_p, const char *key_s, const json_int_t *value_p, const bool required_flag, const char *format_s);
 
-static bool PrintHTMLNumber (Printer *printer_p, const char *key_s, const double value, const bool required_flag, const char *format_s);
+static bool PrintHTMLNumber (Printer *printer_p, const char *key_s, const double *value_p, const bool required_flag, const char *format_s);
 
-static bool PrintHTMLBoolean (Printer *printer_p, const char *key_s, const bool value, const bool required_flag, const char *format_s);
+static bool PrintHTMLBoolean (Printer *printer_p, const char *key_s, const bool *value_p, const bool required_flag, const char *format_s);
 
 static bool PrintHTMLJSON (Printer *printer_p, const char *key_s, const json_t *value_p, const bool required_flag, const char *format_s);
 
 static void FreeHTMLPrinter (Printer *printer_p);
+
+static bool PrintEmptyHTMLValue (Printer *printer_p, const char *key_s);
 
 
 /*
@@ -70,7 +71,7 @@ Printer *AllocateHTMLPrinter (void)
 	if (printer_p)
 		{
 			InitPrinter (& (printer_p -> hp_printer), PrintHTMLHeader, PrintHTMLFooter, PrintHTMLString,
-									 PrintHTMLInteger, PrintHTMLNumber, PrintHTMLInteger, PrintHTMLNumber,  FreeHTMLPrinter);
+									 PrintHTMLInteger, PrintHTMLNumber, PrintHTMLBoolean, PrintHTMLJSON,  FreeHTMLPrinter);
 
 			return (& (printer_p -> hp_printer));
 		}
@@ -87,15 +88,36 @@ Printer *AllocateHTMLPrinter (void)
 static bool PrintHTMLString (Printer *printer_p, const char *key_s, const char *value_s, const bool required_flag, const char *format_s)
 {
 	bool success_flag = false;
-	HTMLPrinter *html_printer_p = (HTMLPrinter *) printer_p;
+	const char *req_s = "";
 
 	if (required_flag)
 		{
-			success_flag = (fprintf (html_printer_p -> hp_out_f, "<li><strong>%s *</strong>: %s</li>\n", key_s, value_s) > 0);
+			req_s = " *";
+		}
+
+	if (!value_s)
+		{
+			value_s = "";
+		}
+
+	if (format_s)
+		{
+			if (strcmp (format_s, FD_TYPE_STRING_FORMAT_URI) == 0)
+				{
+					success_flag = (fprintf (printer_p -> pr_out_f, "<li><strong>%s%s</strong>: <a href =\"%s\">%s</a></li>\n", key_s, req_s, value_s, value_s) > 0);
+				}
+			else if (strcmp (format_s, FD_TYPE_STRING_FORMAT_EMAIL) == 0)
+				{
+					success_flag = (fprintf (printer_p -> pr_out_f, "<li><strong>%s%s</strong>: <a href =\"mailto:%s\">%s</a></li>\n", key_s, req_s, value_s, value_s) > 0);
+				}
+		}
+	else if (value_s)
+		{
+			success_flag = (fprintf (printer_p -> pr_out_f, "<li><strong>%s%s</strong>: %s</li>\n", key_s, req_s, value_s) > 0);
 		}
 	else
 		{
-			success_flag = (fprintf (html_printer_p -> hp_out_f, "<li><strong>%s</strong>: %s</li>\n", key_s, value_s) > 0);
+			success_flag = PrintEmptyHTMLValue (printer_p, key_s);
 		}
 
 	return success_flag;
@@ -103,44 +125,84 @@ static bool PrintHTMLString (Printer *printer_p, const char *key_s, const char *
 
 
 
-static bool PrintHTMLInteger (Printer *printer_p, const char *key_s, const json_int_t value, const bool required_flag, const char *format_s)
+static bool PrintHTMLInteger (Printer *printer_p, const char *key_s, const json_int_t *value_p, const bool required_flag, const char *format_s)
 {
-	HTMLPrinter *html_printer_p = (HTMLPrinter *) printer_p;
+	bool res;
 
-	return (fprintf (html_printer_p -> hp_out_f, "<li><strong>%s</strong>: %" JSON_INTEGER_FORMAT "</li>\n", key_s, value) > 0);
+	if (value_p)
+		{
+			res = (fprintf (printer_p -> pr_out_f, "<li><strong>%s</strong>: %" JSON_INTEGER_FORMAT "</li>\n", key_s, *value_p) > 0);
+		}
+	else
+		{
+			res = PrintEmptyHTMLValue (printer_p, key_s);
+		}
+
+	return res;
 }
 
 
-static bool PrintHTMLNumber (Printer *printer_p, const char *key_s, const double value, const bool required_flag, const char *format_s)
+static bool PrintHTMLNumber (Printer *printer_p, const char *key_s, const double *value_p, const bool required_flag, const char *format_s)
 {
-	HTMLPrinter *html_printer_p = (HTMLPrinter *) printer_p;
+	bool res;
 
-	return (fprintf (html_printer_p -> hp_out_f, "<li><strong>%s</strong>: %lf</li>\n", key_s, value) > 0);
+	if (value_p)
+		{
+			res = (fprintf (printer_p -> pr_out_f, "<li><strong>%s</strong>: %lf</li>\n", key_s, *value_p) > 0);
+		}
+	else
+		{
+			res = PrintEmptyHTMLValue (printer_p, key_s);
+		}
+
+	return res;
 }
 
 
-static bool PrintHTMLBoolean (Printer *printer_p, const char *key_s, const bool value, const bool required_flag, const char *format_s)
+static bool PrintHTMLBoolean (Printer *printer_p, const char *key_s, const bool *value_p, const bool required_flag, const char *format_s)
 {
-	HTMLPrinter *html_printer_p = (HTMLPrinter *) printer_p;
+	bool res;
 
-	return (fprintf (html_printer_p -> hp_out_f, "<li><strong>%s</strong>: %s</li>\n", key_s, value ? "true" : "false") > 0);
+	if (value_p)
+		{
+			res = (fprintf (printer_p -> pr_out_f, "<li><strong>%s</strong>: %s</li>\n", key_s, *value_p ? "true" : "false") > 0);
+		}
+	else
+		{
+			res = PrintEmptyHTMLValue (printer_p, key_s);
+		}
+
+	return res;
 }
 
 
 static bool PrintHTMLJSON (Printer *printer_p, const char *key_s, const json_t *value_p, const bool required_flag, const char *format_s)
 {
-	HTMLPrinter *html_printer_p = (HTMLPrinter *) printer_p;
 	bool success_flag = false;
-	char *json_s = json_dumps (value_p, JSON_INDENT (2));
 
-	if (json_s)
+	if (value_p)
 		{
-			success_flag = (fprintf (html_printer_p -> hp_out_f, "<li><strong>%s</strong>: %s</li>\n", key_s, json_s) > 0);
+			char *json_s = json_dumps (value_p, JSON_INDENT (2));
 
-			free (json_s);
-		}		/* if (json_s) */
+			if (json_s)
+				{
+					success_flag = (fprintf (printer_p -> pr_out_f, "<li><strong>%s</strong>: %s</li>\n", key_s, json_s) > 0);
+
+					free (json_s);
+				}		/* if (json_s) */
+		}
+	else
+		{
+			success_flag = PrintEmptyHTMLValue (printer_p, key_s);
+		}
 
 	return success_flag;
+}
+
+
+static bool PrintEmptyHTMLValue (Printer *printer_p, const char *key_s)
+{
+	return (fprintf (printer_p -> pr_out_f, "<li><strong>%s</strong>: </li>\n", key_s) > 0);
 }
 
 
@@ -148,26 +210,41 @@ static void FreeHTMLPrinter (Printer *printer_p)
 {
 	HTMLPrinter *html_printer_p = (HTMLPrinter *) printer_p;
 
-	if (printer_p -> pr_out_f)
-		{
-			ClosePrinter (printer_p);
-		}
+//ClosePrinter (printer_p);
 
 	free (html_printer_p);
 }
 
 
-static bool PrintHTMLHeader (Printer *printer_p, const char *title_s)
+static bool PrintHTMLHeader (Printer *printer_p, const char *title_s, const char *text_s)
 {
-	bool res = (fprintf (printer_p -> pr_out_f, "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>%s</title>\n</head>\n<body>\n<ul>\n", title_s) > 0);
+	bool res;
+
+	if (text_s)
+		{
+			res = (fprintf (printer_p -> pr_out_f, "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>%s</title>\n</head>\n<body><h1>%s</h1>\n<section>%s\n<ul>\n", title_s, title_s, text_s) > 0);
+		}
+	else
+		{
+			res = (fprintf (printer_p -> pr_out_f, "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\t<title>%s</title>\n</head>\n<body><h1>%s</h1>\n<section>\n<ul>\n", title_s, title_s) > 0);
+		}
 
 	return res;
 }
 
 
-static bool PrintHTMLFooter (Printer *printer_p)
+static bool PrintHTMLFooter (Printer *printer_p, const char *value_s)
 {
-	bool res = (fprintf (printer_p -> pr_out_f, "</ul>\n</body>\n</html>\n") > 0);
+	bool res;
+
+	if (value_s)
+		{
+			res = (fprintf (printer_p -> pr_out_f, "</ul>\n</section>\n<footer>\n%s\n</footer>\n</body>\n</html>\n", value_s) > 0);
+		}
+	else
+		{
+			res = (fprintf (printer_p -> pr_out_f, "</ul>\n</section></body>\n</html>\n") > 0);
+		}
 
 	return res;
 }

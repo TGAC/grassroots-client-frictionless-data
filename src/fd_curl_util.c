@@ -54,7 +54,15 @@ char *GetWebData (const char *url_s)
 					curl_easy_setopt (curl_p, CURLOPT_WRITEDATA, buffer_p);
 					res = curl_easy_perform (curl_p);
 
-					data_s = DetachByteBufferData (buffer_p);
+					if (res == CURLE_OK)
+						{
+							data_s = DetachByteBufferData (buffer_p);
+						}
+					else
+						{
+							fprintf (stderr, "Failed to get data from web address \%s\"\n", url_s);
+							FreeByteBuffer (buffer_p);
+						}
 				}
 
 			curl_easy_cleanup (curl_p);

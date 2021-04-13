@@ -10,7 +10,9 @@
 #include "fd_string_util.h"
 
 
-static bool SetIntegerFromJSON (const json_t *json_p, int32 *value_p);
+static bool SetIntegerFromJSON (const json_t *json_p, json_int_t *value_p);
+static bool SetNumberFromJSON (const json_t *json_p, double *value_p);
+static bool SetBooleanFromJSON (const json_t *json_p, bool *value_p);
 
 
 json_t *GetWebJSON (const char *url_s)
@@ -48,8 +50,7 @@ const char *GetJSONString (const json_t *json_p, const char * const key_s)
 }
 
 
-
-bool GetJSONInteger (const json_t *json_p, const char * const key_s, int *value_p)
+bool GetJSONInteger (const json_t *json_p, const char * const key_s, json_int_t *value_p)
 {
 	bool success_flag = false;
 	json_t *json_value_p = json_object_get (json_p, key_s);
@@ -57,6 +58,34 @@ bool GetJSONInteger (const json_t *json_p, const char * const key_s, int *value_
 	if (json_value_p)
 		{
 			success_flag = SetIntegerFromJSON (json_value_p, value_p);
+		}
+
+	return success_flag;
+}
+
+
+bool GetJSONNumber (const json_t *json_p, const char * const key_s, double *value_p)
+{
+	bool success_flag = false;
+	json_t *json_value_p = json_object_get (json_p, key_s);
+
+	if (json_value_p)
+		{
+			success_flag = SetNumberFromJSON (json_value_p, value_p);
+		}
+
+	return success_flag;
+}
+
+
+bool GetJSONBoolean (const json_t *json_p, const char * const key_s, bool *value_p)
+{
+	bool success_flag = false;
+	json_t *json_value_p = json_object_get (json_p, key_s);
+
+	if (json_value_p)
+		{
+			success_flag = SetBooleanFromJSON (json_value_p, value_p);
 		}
 
 	return success_flag;
@@ -98,7 +127,7 @@ int PrintJSONObject (FILE *out_f, const json_t * const json_p, const char * cons
 }
 
 
-static bool SetIntegerFromJSON (const json_t *json_p, int32 *value_p)
+static bool SetIntegerFromJSON (const json_t *json_p, json_int_t *value_p)
 {
 	bool success_flag = false;
 
@@ -114,4 +143,48 @@ static bool SetIntegerFromJSON (const json_t *json_p, int32 *value_p)
 
 	return success_flag;
 }
+
+
+static bool SetNumberFromJSON (const json_t *json_p, double *value_p)
+{
+	bool success_flag = false;
+
+	if (json_is_number (json_p))
+		{
+			*value_p = json_number_value (json_p);
+			success_flag = true;
+		}
+	else
+		{
+			printf ("JSON value is of the wrong type, %d not number", json_p -> type);
+		}
+
+	return success_flag;
+}
+
+static bool SetBooleanFromJSON (const json_t *json_p, bool *value_p)
+{
+	bool success_flag = false;
+
+	if (json_is_boolean (json_p))
+		{
+			if (json_p == json_true ())
+				{
+					*value_p = true;
+					success_flag = true;
+				}
+			else if (json_p == json_false ())
+				{
+					*value_p = false;
+					success_flag = true;
+				}
+		}
+	else
+		{
+			printf ("JSON value is of the wrong type, %d not boolean", json_p -> type);
+		}
+
+	return success_flag;
+}
+
 

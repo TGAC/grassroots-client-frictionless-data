@@ -283,6 +283,10 @@ bool IsDirectory (const char * const path_s);
 bool RemoveFile (const char * const path_s);
 
 
+
+char *GetOutputFilename (const char *dir_s, const char *name_s, const char *extension_s);
+
+
 #ifdef __cplusplus
 }
 #endif

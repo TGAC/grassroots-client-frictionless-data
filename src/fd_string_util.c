@@ -916,6 +916,27 @@ bool DoesStringContainWhitespace (const char *value_s)
 }
 
 
+
+
+
+bool DoesStringStartWith (const char *value_s, const char *start_s)
+{
+	bool matching_ends_flag = false;
+	const size_t value_length = strlen (value_s);
+	const size_t start_length = strlen (start_s);
+
+	if (value_length >= start_length)
+		{
+			if (strncmp (value_s, start_s, start_length) == 0)
+				{
+					matching_ends_flag = true;
+				}
+		}
+
+	return matching_ends_flag;
+}
+
+
 bool DoesStringEndWith (const char *value_s, const char *ending_s)
 {
 	bool matching_ends_flag = false;
