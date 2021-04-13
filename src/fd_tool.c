@@ -39,6 +39,7 @@
 #include <fd_filesystem_util.h>
 
 #include "html.h"
+#include "markdown_printer.h"
 
 
 typedef struct
@@ -78,7 +79,8 @@ int main (int argc, char *argv [])
 					"\t--out-dir <directory>, the directory where the output files will be written to.\n"
 					"\t--data-fmt <format>, the format to write data resources in. Currently the options are:\n"
 					"\t\thtml, write the files in html format (default).\n"
-					"\t--data-fmt <format>, the format to write data resources in. Currently the options are:\n"
+					"\t\md, write the files in markdown format.\n"
+					"\t--table-fmt <format>, the format to write data resources in. Currently the options are:\n"
 					"\t\tcsv, write the files in csv format (default).\n"
 					"\t--full, show all properties even when the values are empty"
 					);
@@ -90,8 +92,16 @@ int main (int argc, char *argv [])
 			const char *fd_file_s = NULL;
 			const char *out_dir_s = NULL;
 			const char *table_format_s = "csv";
-			const char *data_format_s = "html";
 			bool full_flag = false;
+
+			typedef enum
+			{
+				PRINTER_FORMAT_HTML,
+				PRINTER_FORMAT_MARKDOWN
+			} PrinterFormat;
+
+			PrinterFormat data_format = PRINTER_FORMAT_HTML;
+			const char *data_format_s = "html";
 
 			while (i < argc)
 				{
@@ -121,7 +131,21 @@ int main (int argc, char *argv [])
 						{
 							if ((i + 1) < argc)
 								{
-									data_format_s = argv [++ i];
+									const char *format_s = argv [++ i];
+
+									if (strcmp (format_s, "html") == 0)
+										{
+											data_format = PRINTER_FORMAT_HTML;
+										}
+									else if (strcmp (format_s, "markdown") == 0)
+										{
+											data_format = PRINTER_FORMAT_MARKDOWN;
+										}
+									else
+										{
+											printf ("Unknown data format: \"%s\"\n", format_s);
+										}
+
 								}
 							else
 								{
@@ -154,11 +178,25 @@ int main (int argc, char *argv [])
 			if (fd_file_s)
 				{
 				  Printer *printer_p = NULL;
+					const char *data_ext_s = NULL;
 
-				  if (strcmp (data_format_s, "html") == 0)
-				  	{
-						 	printer_p = AllocateHTMLPrinter ();
-				  	}
+				  switch (data_format)
+						{
+							case PRINTER_FORMAT_HTML:
+								{
+									printer_p = AllocateHTMLPrinter ();
+									data_ext_s = "html";
+								}
+								break;
+
+							case PRINTER_FORMAT_MARKDOWN:
+								{
+									printer_p = AllocateMarkdownPrinter ();
+									data_ext_s = "md";
+								}
+								break;
+						}
+
 
 				  if (printer_p)
 				  	{
@@ -193,7 +231,7 @@ int main (int argc, char *argv [])
 				  	  											{
 				  					  	  						if (name_s)
 				  					  	  							{
-				  					  	  								filename_s = GetOutputFilename (out_dir_s, name_s, data_format_s);
+				  					  	  								filename_s = GetOutputFilename (out_dir_s, name_s, data_ext_s);
 				  					  	  							}		/* if (name_s) */
 				  					  	  						else
 				  					  	  							{
@@ -201,7 +239,7 @@ int main (int argc, char *argv [])
 
 				  					  	  								if (temp_s)
 				  					  	  									{
-				  					  	  										filename_s = GetOutputFilename (out_dir_s, temp_s, data_format_s);
+				  					  	  										filename_s = GetOutputFilename (out_dir_s, temp_s, data_ext_s);
 				  					  	  										FreeCopiedString (temp_s);
 				  					  	  									}
 
@@ -625,11 +663,11 @@ static int SortPropertiesByOrder (const void *v0_p, const void *v1_p)
 	const JSONProperty *json_0_p = (const JSONProperty *) v0_p;
 	const JSONProperty *json_1_p = (const JSONProperty *) v1_p;
 
-	int prop_order_0;
+	json_int_t prop_order_0;
 
 	if (GetJSONInteger (json_0_p -> jp_value_p, FD_PROFILE_PROPERTY_ORDER_S, &prop_order_0))
 		{
-			int prop_order_1;
+			json_int_t prop_order_1;
 
 			if (GetJSONInteger (json_1_p -> jp_value_p, FD_PROFILE_PROPERTY_ORDER_S, &prop_order_1))
 				{

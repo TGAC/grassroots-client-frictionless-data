@@ -47,6 +47,7 @@ SRCS 	:= \
 	fd_string_util.c \
 	fd_tool.c \
 	html.c \
+	markdown_printer.c \
 	printer.c \
 
 ifeq ($(PLATFORM),unix)

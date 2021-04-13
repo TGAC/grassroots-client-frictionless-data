@@ -23,7 +23,6 @@
 #ifndef CLIENTS_FRICTIONLESS_DATA_INCLUDE_HTML_H_
 #define CLIENTS_FRICTIONLESS_DATA_INCLUDE_HTML_H_
 
-#include <stdio.h>
 
 #include "printer.h"
 

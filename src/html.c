@@ -95,30 +95,38 @@ static bool PrintHTMLString (Printer *printer_p, const char *key_s, const char *
 			req_s = " *";
 		}
 
-	if (!value_s)
-		{
-			value_s = "";
-		}
 
-	if (format_s)
+	if (value_s)
 		{
-			if (strcmp (format_s, FD_TYPE_STRING_FORMAT_URI) == 0)
+			bool printed_flag = false;
+
+			if (format_s)
 				{
-					success_flag = (fprintf (printer_p -> pr_out_f, "<li><strong>%s%s</strong>: <a href =\"%s\">%s</a></li>\n", key_s, req_s, value_s, value_s) > 0);
+					if (strcmp (format_s, FD_TYPE_STRING_FORMAT_URI) == 0)
+						{
+							success_flag = (fprintf (printer_p -> pr_out_f, "<li><strong>%s%s</strong>: <a href =\"%s\">%s</a></li>\n", key_s, req_s, value_s, value_s) > 0);
+							printed_flag = true;
+						}
+					else if (strcmp (format_s, FD_TYPE_STRING_FORMAT_EMAIL) == 0)
+						{
+							success_flag = (fprintf (printer_p -> pr_out_f, "<li><strong>%s%s</strong>: <a href =\"mailto:%s\">%s</a></li>\n", key_s, req_s, value_s, value_s) > 0);
+							printed_flag = true;
+						}
 				}
-			else if (strcmp (format_s, FD_TYPE_STRING_FORMAT_EMAIL) == 0)
+
+			if (!printed_flag)
 				{
-					success_flag = (fprintf (printer_p -> pr_out_f, "<li><strong>%s%s</strong>: <a href =\"mailto:%s\">%s</a></li>\n", key_s, req_s, value_s, value_s) > 0);
+					success_flag = (fprintf (printer_p -> pr_out_f, "<li><strong>%s%s</strong>: %s</li>\n", key_s, req_s, value_s) > 0);
 				}
-		}
-	else if (value_s)
-		{
-			success_flag = (fprintf (printer_p -> pr_out_f, "<li><strong>%s%s</strong>: %s</li>\n", key_s, req_s, value_s) > 0);
-		}
+
+		}		/* if (value_s) */
 	else
 		{
 			success_flag = PrintEmptyHTMLValue (printer_p, key_s);
 		}
+
+
+
 
 	return success_flag;
 }
