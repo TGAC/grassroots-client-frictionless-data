@@ -10,7 +10,7 @@
 
 
 
-void InitPrinter (Printer *printer_p,
+void InitFDPrinter (Printer *printer_p,
 									bool (*print_header_fn) (Printer *printer_p, const char *title_s, const char *text_s),
 									bool (*print_footer_fn) (Printer *printer_p, const char *text_s),
 									bool (*print_string_fn) (Printer *printer_p, const char *key_s, const char *value_s, const bool required_flag, const char *format_s),
@@ -34,11 +34,11 @@ void InitPrinter (Printer *printer_p,
 }
 
 
-bool OpenPrinter (Printer *printer_p, const char *filename_s)
+bool OpenFDPrinter (Printer *printer_p, const char *filename_s)
 {
 	bool success_flag = false;
 
-	if (ClosePrinter (printer_p))
+	if (CloseFDPrinter (printer_p))
 		{
 			printer_p -> pr_out_f = fopen (filename_s, "w");
 
@@ -52,7 +52,7 @@ bool OpenPrinter (Printer *printer_p, const char *filename_s)
 }
 
 
-bool ClosePrinter (Printer *printer_p)
+bool CloseFDPrinter (Printer *printer_p)
 {
 	bool success_flag = true;
 
@@ -115,7 +115,7 @@ bool PrintJSON (Printer *printer_p, const char *key_s, const json_t *value_p, co
 
 
 
-void FreePrinter (Printer *printer_p)
+void FreeFDPrinter (Printer *printer_p)
 {
 	printer_p -> pr_free_fn (printer_p);
 }

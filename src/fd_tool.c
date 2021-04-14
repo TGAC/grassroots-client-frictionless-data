@@ -36,9 +36,9 @@
 #include "printer.h"
 #include "fd_json_util.h"
 #include "fd_string_util.h"
-#include <fd_filesystem_util.h>
+#include "fd_filesystem_util.h"
 
-#include "html.h"
+#include "html_printer.h"
 #include "markdown_printer.h"
 
 
@@ -247,14 +247,14 @@ int main (int argc, char *argv [])
 
 				  					  	  						if (filename_s)
 				  					  	  							{
-				  					  	  								if (OpenPrinter (printer_p, filename_s))
+				  					  	  								if (OpenFDPrinter (printer_p, filename_s))
 				  					  	  									{
 				  					  	  										PrintHeader (printer_p, name_s, NULL);
 								  	  												ParsePackageFromSchema (resource_p, schema_p, printer_p, full_flag);
 
 
 				  					  	  										PrintFooter (printer_p, profile_s);
-				  					  	  										ClosePrinter (printer_p);
+				  					  	  										CloseFDPrinter (printer_p);
 				  					  	  									}		/* if (OpenPrinter (printer_p, filename_s)) */
 
 
@@ -329,7 +329,7 @@ int main (int argc, char *argv [])
 				  	  	}
 
 
-				  		FreePrinter (printer_p);
+				  		FreeFDPrinter (printer_p);
 				  	}		/* if (printer_p) */
 
 				}		/* if (fd_file_s) */

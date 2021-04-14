@@ -46,7 +46,7 @@ SRCS 	:= \
 	fd_json_util.c \
 	fd_string_util.c \
 	fd_tool.c \
-	html.c \
+	html_printer.c \
 	markdown_printer.c \
 	printer.c \
 

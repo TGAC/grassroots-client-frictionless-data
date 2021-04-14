@@ -33,7 +33,7 @@ struct Printer
 
 
 
-void InitPrinter (Printer *printer_p,
+void InitFDPrinter (Printer *printer_p,
 									bool (*print_header_fn) (Printer *printer_p, const char *title_s, const char *text_s),
 									bool (*print_footer_fn) (Printer *printer_p, const char *text_s),
 									bool (*print_string_fn) (Printer *printer_p, const char *key_s, const char *value_s, const bool required_flag, const char *format_s),
@@ -43,9 +43,9 @@ void InitPrinter (Printer *printer_p,
 									bool (*print_json_fn) (Printer *printer_p, const char *key_s, const json_t *value_p, const bool required_flag, const char *format_s),
 									void (*free_fn) (Printer *printer_p));
 
-bool OpenPrinter (Printer *printer_p, const char *filename_s);
+bool OpenFDPrinter (Printer *printer_p, const char *filename_s);
 
-bool ClosePrinter (Printer *printer_p);
+bool CloseFDPrinter (Printer *printer_p);
 
 
 bool PrintHeader (Printer *printer_p, const char *title_s, const char *text_s);
@@ -62,6 +62,6 @@ bool PrintBoolean (Printer *printer_p, const char *key_s, const bool *value_p, c
 
 bool PrintJSON (Printer *printer_p, const char *key_s, const json_t *value_p, const bool required_flag, const char *format_s);
 
-void FreePrinter (Printer *printer_p);
+void FreeFDPrinter (Printer *printer_p);
 
 #endif /* CLIENTS_FRICTIONLESS_DATA_INCLUDE_PRINTER_H_ */

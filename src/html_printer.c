@@ -22,7 +22,7 @@
 
 #include <stdlib.h>
 
-#include "html.h"
+#include "html_printer.h"
 
 #include "fd_json_util.h"
 
@@ -70,7 +70,7 @@ Printer *AllocateHTMLPrinter (void)
 
 	if (printer_p)
 		{
-			InitPrinter (& (printer_p -> hp_printer), PrintHTMLHeader, PrintHTMLFooter, PrintHTMLString,
+			InitFDPrinter (& (printer_p -> hp_printer), PrintHTMLHeader, PrintHTMLFooter, PrintHTMLString,
 									 PrintHTMLInteger, PrintHTMLNumber, PrintHTMLBoolean, PrintHTMLJSON,  FreeHTMLPrinter);
 
 			return (& (printer_p -> hp_printer));
