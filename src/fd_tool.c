@@ -639,8 +639,38 @@ static bool ParsePackageFromSchema (const json_t *data_p, const json_t *schema_p
 												}
 
 										}		/* else if (strcmp (type_s, FD_TYPE_BOOLEAN) == 0) */
-									else
+									else if (strcmp (type_s, FD_TYPE_JSON_ARRAY) == 0)
 										{
+											const char *schema_uri_s = GetRefSchemaURI (property_p);
+
+											if (schema_uri_s)
+												{
+													if (DoesStringStartWith (schema_uri_s, "http"))
+														{
+															json_t *child_schema_p = GetWebJSON (schema_uri_s);
+
+															if (child_schema_p)
+																{
+																	const json_t *values_p = json_object_get (property_p, key_s);
+
+																	if (values_p)
+																		{
+																			if (json_is_array (values_p))
+																				{
+																					bool success_flag = ParsePackageFromSchema (values_p, child_schema_p, printer_p, full_flag);
+
+																				}
+																		}
+
+
+
+																	json_decref (child_schema_p);
+																}		/*if (child_schema_p) */
+
+														}		/* if (DoesStringStartWith (schema_uri_s, "http")) */
+
+												}		/* if (schema_uri_s) */
+				  	  									{
 
 										}
 
