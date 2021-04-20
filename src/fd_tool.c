@@ -654,7 +654,7 @@ static bool ParsePackageFromSchema (const json_t *data_p, const json_t *schema_p
 
 															if (child_schema_p)
 																{
-																	const json_t *values_p = json_object_get (property_p, key_s);
+																	const json_t *values_p = json_object_get (data_p, key_s);
 
 																	if (values_p)
 																		{
