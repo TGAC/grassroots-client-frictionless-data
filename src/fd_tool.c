@@ -661,7 +661,7 @@ static bool ParsePackageFromSchema (const json_t *data_p, const json_t *schema_p
 																			if (json_is_array (values_p))
 																				{
 																					const json_t *entry_p;
-																					size_t j
+																					size_t j;
 
 																					json_array_foreach (values_p, j, entry_p)
 																						{

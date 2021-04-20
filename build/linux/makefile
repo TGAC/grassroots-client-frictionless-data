@@ -58,7 +58,13 @@ else ifeq ($(PLATFORM),amiga)
 	SRCS += amiga_filesystem.c 	
 endif
 
-LDFLAGS += $(DIR_JANSSON_LIB)/libjansson.a -lcurl # $(DIR_CURL_LIB)/libcurl.a
+LDFLAGS += 	\
+	-L$(DIR_GRASSROOTS_FRICTIONLESS_LIB) -l$(GRASSROOTS_FRICTIONLESS_LIB_NAME) \
+	-L$(DIR_GRASSROOTS_UTIL_LIB) -l$(GRASSROOTS_UTIL_LIB_NAME) \
+	-L$(DIR_JANSSON_LIB) -ljansson \
+	-L$(DIR_PCRE_LIB) -lpcre \
+	-lcurl
+
 
 ifeq ($(BUILD),release)
 	CFLAGS 	+= -O3 -s
