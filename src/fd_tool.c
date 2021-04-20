@@ -639,10 +639,14 @@ static bool ParsePackageFromSchema (const json_t *data_p, const json_t *schema_p
 												}
 
 										}		/* else if (strcmp (type_s, FD_TYPE_BOOLEAN) == 0) */
-									else
+									else if (strcmp (type_s, FD_TYPE_JSON_ARRAY) == 0)
 										{
+											/*
+											 * Do we have a schema?
+											 */
 
-										}
+
+										}		/* else if (strcmp (type_s, FD_TYPE_JSON_ARRAY) == 0) */
 
 								}		/* if (type_s) */
 
