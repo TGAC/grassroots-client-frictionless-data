@@ -13,6 +13,9 @@
 void InitFDPrinter (Printer *printer_p,
 									bool (*print_header_fn) (Printer *printer_p, const char *title_s, const char *text_s),
 									bool (*print_footer_fn) (Printer *printer_p, const char *text_s),
+									bool (*print_text_fn) (Printer *printer_p, const char *text_s),
+									bool (*print_section_start_fn) (Printer *printer_p, const char *text_s),
+									bool (*print_section_end_fn) (Printer *printer_p, const char *text_s),
 									bool (*print_string_fn) (Printer *printer_p, const char *key_s, const char *value_s, const bool required_flag, const char *format_s),
 									bool (*print_integer_fn) (Printer *printer_p, const char *key_s, const json_int_t *value_p, const bool required_flag, const char *format_s),
 									bool (*print_number_fn) (Printer *printer_p, const char *key_s, const double *value_p, const bool required_flag, const char *format_s),
@@ -24,6 +27,12 @@ void InitFDPrinter (Printer *printer_p,
 
 	printer_p -> pr_print_header_fn = print_header_fn;
 	printer_p -> pr_print_footer_fn = print_footer_fn;
+
+	printer_p -> pr_print_text_fn = print_text_fn;
+
+	printer_p -> pr_print_section_start_fn = print_section_start_fn;
+	printer_p -> pr_print_section_end_fn = print_section_end_fn;
+
 
 	printer_p -> pr_print_string_fn = print_string_fn;
 	printer_p -> pr_print_integer_fn = print_integer_fn;
@@ -70,6 +79,20 @@ bool CloseFDPrinter (Printer *printer_p)
 
 	return success_flag;
 }
+
+
+
+bool StartPrintSection (Printer *printer_p, const char *value_s)
+{
+	return (printer_p -> pr_print_section_start_fn (printer_p, value_s));
+}
+
+
+bool EndPrintSection (Printer *printer_p, const char *value_s)
+{
+	return (printer_p -> pr_print_section_end_fn (printer_p, value_s));
+}
+
 
 
 bool PrintHeader (Printer *printer_p, const char *title_s, const char *text_s)

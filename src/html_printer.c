@@ -43,6 +43,7 @@ static bool PrintHTMLHeader (Printer *printer_p, const char *title_s, const char
 
 static bool PrintHTMLFooter (Printer *printer_p, const char *text_s);
 
+static bool PrintHTMLText (Printer *printer_p, const char *value_s);
 
 static bool PrintHTMLString (Printer *printer_p, const char *key_s, const char *value_s, const bool required_flag, const char *format_s);
 
@@ -59,6 +60,11 @@ static void FreeHTMLPrinter (Printer *printer_p);
 static bool PrintEmptyHTMLValue (Printer *printer_p, const char *key_s);
 
 
+
+static bool PrintHTMLSectionStart (Printer *printer_p, const char *value_s);
+
+static bool PrintHTMLSectionEnd (Printer *printer_p, const char *value_s);
+
 /*
  * api definitions
  */
@@ -70,7 +76,8 @@ Printer *AllocateHTMLPrinter (void)
 
 	if (printer_p)
 		{
-			InitFDPrinter (& (printer_p -> hp_printer), PrintHTMLHeader, PrintHTMLFooter, PrintHTMLString,
+			InitFDPrinter (& (printer_p -> hp_printer), PrintHTMLHeader, PrintHTMLFooter, PrintHTMLText, PrintHTMLSectionStart,
+										 PrintHTMLSectionEnd, PrintHTMLString,
 									 PrintHTMLInteger, PrintHTMLNumber, PrintHTMLBoolean, PrintHTMLJSON,  FreeHTMLPrinter);
 
 			return (& (printer_p -> hp_printer));
@@ -252,6 +259,38 @@ static bool PrintHTMLFooter (Printer *printer_p, const char *value_s)
 	else
 		{
 			res = (fprintf (printer_p -> pr_out_f, "</ul>\n</section></body>\n</html>\n") > 0);
+		}
+
+	return res;
+}
+
+
+static bool PrintHTMLText (Printer *printer_p, const char *value_s)
+{
+	bool res = (fprintf (printer_p -> pr_out_f, "<p>%s</p>\n", value_s) > 0);
+
+	return res;
+}
+
+
+static bool PrintHTMLSectionStart (Printer *printer_p, const char *value_s)
+{
+	bool res = (fprintf (printer_p -> pr_out_f, "<section><h2>%s</h2>\n", value_s) > 0);
+
+	return res;
+}
+
+static bool PrintHTMLSectionEnd (Printer *printer_p, const char *value_s)
+{
+	bool res;
+
+	if (value_s)
+		{
+			res = (fprintf (printer_p -> pr_out_f, "%s</section>\n", value_s) > 0);
+		}
+	else
+		{
+			res = (fprintf (printer_p -> pr_out_f, "</section>\n") > 0);
 		}
 
 	return res;

@@ -29,6 +29,8 @@ static bool PrintMarkdownHeader (Printer *printer_p, const char *title_s, const 
 
 static bool PrintMarkdownFooter (Printer *printer_p, const char *text_s);
 
+static bool PrintMarkdownText (Printer *printer_p, const char *value_s);
+
 
 static bool PrintMarkdownString (Printer *printer_p, const char *key_s, const char *value_s, const bool required_flag, const char *format_s);
 
@@ -44,6 +46,11 @@ static void FreeMarkdownPrinter (Printer *printer_p);
 
 static bool PrintEmptyMarkdownValue (Printer *printer_p, const char *key_s);
 
+static bool PrintMarkdownSectionStart (Printer *printer_p, const char *value_s);
+
+static bool PrintMarkdownSectionEnd (Printer *printer_p, const char *value_s);
+
+
 
 /*
  * api definitions
@@ -56,7 +63,8 @@ Printer *AllocateMarkdownPrinter (void)
 
 	if (printer_p)
 		{
-			InitFDPrinter (& (printer_p -> mp_printer), PrintMarkdownHeader, PrintMarkdownFooter, PrintMarkdownString,
+			InitFDPrinter (& (printer_p -> mp_printer), PrintMarkdownHeader, PrintMarkdownFooter, PrintMarkdownText,
+										 PrintMarkdownSectionStart, PrintMarkdownSectionEnd, PrintMarkdownString,
 									 PrintMarkdownInteger, PrintMarkdownNumber, PrintMarkdownBoolean, PrintMarkdownJSON,  FreeMarkdownPrinter);
 
 			return (& (printer_p -> mp_printer));
@@ -225,6 +233,29 @@ static bool PrintMarkdownHeader (Printer *printer_p, const char *title_s, const 
 
 
 static bool PrintMarkdownFooter (Printer *printer_p, const char *value_s)
+{
+	return true;
+}
+
+
+
+static bool PrintMarkdownText(Printer *printer_p, const char *value_s)
+{
+	bool res = (fprintf (printer_p -> pr_out_f, "%s\n", value_s) > 0);
+
+	return res;
+}
+
+
+
+static bool PrintMarkdownSectionStart (Printer *printer_p, const char *value_s)
+{
+	bool res = (fprintf (printer_p -> pr_out_f, "\n\n## %s\n\n", value_s) > 0);
+
+	return res;
+}
+
+static bool PrintMarkdownSectionEnd (Printer *printer_p, const char *value_s)
 {
 	return true;
 }

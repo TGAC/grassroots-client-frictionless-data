@@ -59,7 +59,7 @@ static bool CreateCSVFile (const char *filename_s, const char *col_sep_s, const 
 
 static int SortPropertiesByOrder (const void *v0_p, const void *v1_p);
 
-static bool ParsePackageFromSchema (const json_t *data_p, const json_t *schema_p, Printer *printer_p, const bool full_flag);
+static bool ParsePackageFromSchema (const json_t *data_p, const json_t *schema_p, Printer *printer_p, const bool full_flag, const size_t indent_level);
 
 
 
@@ -250,7 +250,7 @@ int main (int argc, char *argv [])
 				  					  	  								if (OpenFDPrinter (printer_p, filename_s))
 				  					  	  									{
 				  					  	  										PrintHeader (printer_p, name_s, NULL);
-								  	  												ParsePackageFromSchema (resource_p, schema_p, printer_p, full_flag);
+								  	  												ParsePackageFromSchema (resource_p, schema_p, printer_p, full_flag, 0);
 
 
 				  					  	  										PrintFooter (printer_p, profile_s);
@@ -490,7 +490,7 @@ static bool CreateCSVFile (const char *filename_s, const char *col_sep_s, const 
 
 
 
-static bool ParsePackageFromSchema (const json_t *data_p, const json_t *schema_p, Printer *printer_p, const bool full_flag)
+static bool ParsePackageFromSchema (const json_t *data_p, const json_t *schema_p, Printer *printer_p, const bool full_flag, const size_t indent_level)
 {
 	bool result = false;
 	const json_t *required_entries_p = json_object_get (schema_p, "required");
@@ -662,17 +662,25 @@ static bool ParsePackageFromSchema (const json_t *data_p, const json_t *schema_p
 																				{
 																					const json_t *entry_p;
 																					size_t j;
+																					const char *title_s = GetJSONString (property_p, key_s);
+
+																					if (!title_s)
+																						{
+																							title_s = key_s;
+																						}
+
+																					StartPrintSection (printer_p, title_s);
 
 																					json_array_foreach (values_p, j, entry_p)
 																						{
-																							if (!ParsePackageFromSchema (entry_p, child_schema_p, printer_p, full_flag))
+																							if (!ParsePackageFromSchema (entry_p, child_schema_p, printer_p, full_flag, indent_level + 1))
 																								{
 																									fprintf (stderr, "Failed to parse \"%s\"\n", key_s);
 																								}
 
 																						}
 
-
+																					EndPrintSection (printer_p, NULL);
 
 																				}
 																		}
