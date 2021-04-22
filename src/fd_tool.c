@@ -29,14 +29,15 @@
 
 #include "typedefs.h"
 
-#define ALLOCATE_FD_UTIL_TAGS (1)
+//#define ALLOCATE_FD_UTIL_TAGS (1)
 #include "frictionless_data_util.h"
 
 
 #include "printer.h"
-#include "fd_json_util.h"
-#include "fd_string_util.h"
-#include "fd_filesystem_util.h"
+#include "json_util.h"
+#include "string_utils.h"
+#include "curl_tools.h"
+#include "filesystem_utils.h"
 
 #include "html_printer.h"
 #include "markdown_printer.h"
@@ -61,6 +62,9 @@ static int SortPropertiesByOrder (const void *v0_p, const void *v1_p);
 
 static bool ParsePackageFromSchema (const json_t *data_p, const json_t *schema_p, Printer *printer_p, const bool full_flag, const size_t indent_level);
 
+static char *GetOutputFilename (const char *dir_s, const char *name_s, const char *extension_s);
+
+static json_t *GetWebJSON (const char *url_s);
 
 
 /*
@@ -452,7 +456,7 @@ static bool CreateCSVFile (const char *filename_s, const char *col_sep_s, const 
 																}
 															else
 																{
-																	PrintJSONObject (stderr, value_p, "Unknown JSON type: ");
+																	PrintJSON (stderr, value_p, "Unknown JSON type: ");
 																}
 														}
 
@@ -609,7 +613,7 @@ static bool ParsePackageFromSchema (const json_t *data_p, const json_t *schema_p
 											double value;
 											double *number_value_p = NULL;
 
-											if (GetJSONNumber (data_p, key_s, &value))
+											if (GetJSONReal (data_p, key_s, &value))
 												{
 													number_value_p = &value;
 													print_flag = true;
@@ -731,3 +735,91 @@ static int SortPropertiesByOrder (const void *v0_p, const void *v1_p)
 
 	return res;
 }
+
+
+
+static char *GetOutputFilename (const char *dir_s, const char *name_s, const char *extension_s)
+{
+	char *filename_s = NULL;
+	char *copied_name_s = ConcatenateVarargsStrings (name_s, ".", extension_s, NULL);
+
+	if (copied_name_s)
+		{
+			/*
+			 * Replace any non file-system characters to
+			 * make sure that it is a valid filename.
+			 * The safest approach is to replace all
+			 * non-alphanumeric characters with an
+			 * underscore.
+			 */
+			char *c_p = copied_name_s;
+			size_t i = strlen (name_s);
+
+			for ( ; i > 0; -- i, ++ c_p)
+				{
+					if (isalnum (*c_p) == 0)
+						{
+							*c_p = '_';
+						}
+				}
+
+			if (dir_s)
+				{
+					if (EnsureDirectoryExists (dir_s))
+						{
+							filename_s = MakeFilename (dir_s, copied_name_s);
+						}
+					else
+						{
+							fprintf (stderr, "Failed to create output directory \"%s\"\n", dir_s);
+						}
+
+					FreeCopiedString (copied_name_s);
+				}		/* if (dir_s) */
+			else
+				{
+					filename_s = copied_name_s;
+				}
+
+		}		/* if (copied_name_s) */
+
+	return filename_s;
+}
+
+
+static json_t *GetWebJSON (const char *url_s)
+{
+	json_t *data_p = NULL;
+	CurlTool *curl_tool_p = AllocateCurlTool (CM_MEMORY);
+
+	if (curl_tool_p)
+		{
+			if (SetUriForCurlTool (curl_tool_p, url_s))
+				{
+					CURLcode res = RunCurlTool (curl_tool_p);
+
+					if (res == CURLE_OK)
+						{
+							const char *data_s = GetCurlToolData (curl_tool_p);
+
+
+							if (data_s)
+								{
+									json_error_t err;
+									data_p = json_loads (data_s, 0, &err);
+
+									FreeCopiedString (data_s);
+								}
+						}
+				}
+
+			FreeCurlTool (curl_tool_p);
+		}
+
+	return data_p;
+}
+
+
+
+
+

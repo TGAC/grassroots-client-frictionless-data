@@ -24,7 +24,7 @@
 
 #include "html_printer.h"
 
-#include "fd_json_util.h"
+#include "json_util.h"
 
 #include "frictionless_data_util.h"
 

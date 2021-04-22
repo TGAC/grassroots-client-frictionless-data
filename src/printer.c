@@ -131,7 +131,7 @@ bool PrintBoolean (Printer *printer_p, const char *key_s, const bool *value_p, c
 }
 
 
-bool PrintJSON (Printer *printer_p, const char *key_s, const json_t *value_p, const bool required_flag, const char *format_s)
+bool PrintJSONObject (Printer *printer_p, const char *key_s, const json_t *value_p, const bool required_flag, const char *format_s)
 {
 	return (printer_p -> pr_print_json_fn (printer_p, key_s, value_p, required_flag, format_s));
 }

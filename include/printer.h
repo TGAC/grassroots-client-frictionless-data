@@ -74,7 +74,7 @@ bool PrintNumber (Printer *printer_p, const char *key_s, const double *value_p, 
 
 bool PrintBoolean (Printer *printer_p, const char *key_s, const bool *value_p, const bool required_flag, const char *format_s);
 
-bool PrintJSON (Printer *printer_p, const char *key_s, const json_t *value_p, const bool required_flag, const char *format_s);
+bool PrintJSONObject (Printer *printer_p, const char *key_s, const json_t *value_p, const bool required_flag, const char *format_s);
 
 void FreeFDPrinter (Printer *printer_p);
 
