@@ -41,6 +41,7 @@
 
 #include "html_printer.h"
 #include "markdown_printer.h"
+#include "math_utils.h"
 
 
 typedef struct
@@ -808,7 +809,7 @@ static json_t *GetWebJSON (const char *url_s)
 									json_error_t err;
 									data_p = json_loads (data_s, 0, &err);
 
-									FreeCopiedString (data_s);
+									//FreeCopiedString (data_s);
 								}
 						}
 				}
