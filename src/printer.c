@@ -34,11 +34,11 @@ void InitPrinter (Printer *printer_p,
 }
 
 
-bool OpenPrinter (Printer *printer_p, const char *filename_s)
+bool OpenFDPrinter (Printer *printer_p, const char *filename_s)
 {
 	bool success_flag = false;
 
-	if (ClosePrinter (printer_p))
+	if (CloseFDPrinter (printer_p))
 		{
 			printer_p -> pr_out_f = fopen (filename_s, "w");
 
@@ -52,7 +52,7 @@ bool OpenPrinter (Printer *printer_p, const char *filename_s)
 }
 
 
-bool ClosePrinter (Printer *printer_p)
+bool CloseFDPrinter (Printer *printer_p)
 {
 	bool success_flag = true;
 

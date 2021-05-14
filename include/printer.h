@@ -43,9 +43,9 @@ void InitPrinter (Printer *printer_p,
 									bool (*print_json_fn) (Printer *printer_p, const char *key_s, const json_t *value_p, const bool required_flag, const char *format_s),
 									void (*free_fn) (Printer *printer_p));
 
-bool OpenPrinter (Printer *printer_p, const char *filename_s);
+bool OpenFDPrinter (Printer *printer_p, const char *filename_s);
 
-bool ClosePrinter (Printer *printer_p);
+bool CloseFDPrinter (Printer *printer_p);
 
 
 bool PrintHeader (Printer *printer_p, const char *title_s, const char *text_s);

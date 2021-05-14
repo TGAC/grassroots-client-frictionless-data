@@ -39,7 +39,7 @@
 #include <fd_filesystem_util.h>
 
 #include "html.h"
-#include "markdown_printer.h"
+//#include "markdown_printer.h"
 
 
 typedef struct
@@ -191,7 +191,7 @@ int main (int argc, char *argv [])
 
 							case PRINTER_FORMAT_MARKDOWN:
 								{
-									printer_p = AllocateMarkdownPrinter ();
+	//								printer_p = AllocateMarkdownPrinter ();
 									data_ext_s = "md";
 								}
 								break;
@@ -247,14 +247,14 @@ int main (int argc, char *argv [])
 
 				  					  	  						if (filename_s)
 				  					  	  							{
-				  					  	  								if (OpenPrinter (printer_p, filename_s))
+				  					  	  								if (OpenFDPrinter (printer_p, filename_s))
 				  					  	  									{
 				  					  	  										PrintHeader (printer_p, name_s, NULL);
 								  	  												ParsePackageFromSchema (resource_p, schema_p, printer_p, full_flag);
 
 
 				  					  	  										PrintFooter (printer_p, profile_s);
-				  					  	  										ClosePrinter (printer_p);
+				  					  	  										CloseFDPrinter (printer_p);
 				  					  	  									}		/* if (OpenPrinter (printer_p, filename_s)) */
 
 

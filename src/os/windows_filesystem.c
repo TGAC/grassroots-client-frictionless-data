@@ -21,11 +21,10 @@
 #include <WinBase.h>
 #include <Dbghelp.h>
 
-#include "filesystem.h"
-#include "linked_list.h"
+#include "fd_filesystem_util.h"
 #include "memory_allocations.h"
-#include "string_utils.h"
-#include "string_linked_list.h"
+#include "fd_string_util.h"
+
 
 
 
@@ -81,117 +80,12 @@ BOOLEAN IsPathAbsolute (const char * const path_s)
 	return absolute_path_flag;
 }
 
-
-LinkedList *GetMatchingFiles (const char * const pattern)
-{
-	LinkedList *list_p = AllocateLinkedList (FreeStringListNode);
-
-	if (list_p)
-		{
-			WIN32_FIND_DATA file_data;
-			char filename [MAX_PATH + 1];
-			HANDLE handle;
-			size_t len = strlen (pattern);
-
-			if (len <= MAX_PATH)
-				{
-					strcpy (filename, pattern);
-
-					if ((handle = FindFirstFile (filename, &file_data)) != INVALID_HANDLE_VALUE)
-						{
-							uint32 value = (file_data.dwFileAttributes) & FILE_ATTRIBUTE_DIRECTORY;
-
-							if (value != FILE_ATTRIBUTE_DIRECTORY)
-								{
-									StringListNode *node_p = AllocateStringListNode (file_data.cFileName, MF_DEEP_COPY);
-									if (node_p)
-										{
-											LinkedListAddTail (list_p, (ListNode *) node_p);
-										}
-
-									while (FindNextFile (handle, &file_data))
-										{
-											value = (file_data.dwFileAttributes) & FILE_ATTRIBUTE_DIRECTORY;
-											if (value != FILE_ATTRIBUTE_DIRECTORY)
-												{
-													node_p = AllocateStringListNode (file_data.cFileName, MF_DEEP_COPY);
-													if (node_p)
-														{
-															LinkedListAddTail (list_p, (ListNode *) node_p);
-														}
-
-												}
-										}
-								}
-
-							if (! (FindClose (handle)))
-								{
-									// couldn't close search handle
-								}
-						}
-				}
-
-			if (list_p -> ll_size > 0)
-				{
-					return list_p;
-				}
-			else
-				{
-					FreeLinkedList (list_p);
-				}
-		}
-
-	return NULL;
-}
-
-
 BOOLEAN EnsureDirectoryExists (const char * const path_s)
 {
 	return MakeSureDirectoryPathExists (path_s);
 }
 
 
-BOOLEAN CopyToNewFile (const char * const src_filename, const char * const dest_filename, void (*callback_fn) ())
-{
-	LPPROGRESS_ROUTINE prog_fn = (LPPROGRESS_ROUTINE) callback_fn;
-
-	if (callback_fn)
-		{
-			return (CopyFileEx (src_filename, dest_filename, prog_fn, NULL, 0, 0) != 0);
-		}
-	else
-		{
-			return (CopyFile (src_filename, dest_filename, TRUE) != 0);
-		}
-}
-
-
-BOOLEAN SetCurrentWorkingDirectory (const char * const path)
-{
-	return (SetCurrentDirectory (path) != 0);
-}
-
-
-char *GetCurrentWorkingDirectory (void)
-{
-  TCHAR buffer [MAX_PATH];
-  DWORD path_length = GetCurrentDirectory (MAX_PATH, buffer);
-
-  if (path_length == 0)
-	  {
-			/* Failed */
-		  return NULL;
-		}
-	else if (path_length > MAX_PATH)
-	  {
-		  /* Buffer too small */
-			return NULL;
-		}
-	else
-		{
-			return CopyToNewString (buffer, 0, FALSE);
-		}
-}
 
 
 BOOLEAN IsDirectory (const char * const path)

@@ -28,6 +28,8 @@
 
 #include "frictionless_data_util.h"
 
+#include "jansson.h"
+
 
 typedef struct
 {
