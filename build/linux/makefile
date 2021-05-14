@@ -28,6 +28,7 @@ VPATH	:= \
 
 INCLUDES := \
 	-I$(DIR_INCLUDE) \
+	-I$(DIR_GRASSROOTS_UUID_INC) \
 	-I$(DIR_GRASSROOTS_UTIL_INC) \
 	-I$(DIR_GRASSROOTS_UTIL_INC)/containers \
 	-I$(DIR_GRASSROOTS_UTIL_INC)/io \
@@ -37,28 +38,31 @@ INCLUDES := \
 	-I$(DIR_GRASSROOTS_NETWORK_INC) \
 	-I$(DIR_GRASSROOTS_SERVER_INC) \
 	-I$(DIR_GRASSROOTS_SERVICES_INC) \
-	-I$(FIELD_TRIAL_INC) 
+	-I$(DIR_GRASSROOTS_FRICTIONLESS_INC) \
 	
 SRCS 	:= \
-	fd_byte_buffer.c \
-	fd_curl_util.c \
-	fd_filesystem_util.c \
-	fd_json_util.c \
-	fd_string_util.c \
 	fd_tool.c \
-	html.c \
+	html_printer.c \
 	markdown_printer.c \
 	printer.c \
 
-ifeq ($(PLATFORM),unix)
-	SRCS += unix_filesystem.c 
-else ifeq ($(PLATFORM),windows)
-	SRCS += windows_filesystem.c 
-else ifeq ($(PLATFORM),amiga)
-	SRCS += amiga_filesystem.c 	
-endif
+#ifeq ($(PLATFORM),unix)
+#	SRCS += unix_filesystem.c 
+#else ifeq ($(PLATFORM),windows)
+#	SRCS += windows_filesystem.c 
+#else ifeq ($(PLATFORM),amiga)
+#	SRCS += amiga_filesystem.c 	
+#endif
 
-LDFLAGS += $(DIR_JANSSON_LIB)/libjansson.a -lcurl # $(DIR_CURL_LIB)/libcurl.a
+LDFLAGS += 	\
+	-L$(DIR_GRASSROOTS_FRICTIONLESS_LIB) -l$(GRASSROOTS_FRICTIONLESS_LIB_NAME) \
+	-L$(DIR_GRASSROOTS_UTIL_LIB) -l$(GRASSROOTS_UTIL_LIB_NAME) \
+	-L$(DIR_GRASSROOTS_NETWORK_LIB) -l$(GRASSROOTS_NETWORK_LIB_NAME) \
+	-L$(DIR_GRASSROOTS_UUID_LIB) -l$(GRASSROOTS_UUID_LIB_NAME) \
+	-L$(DIR_JANSSON_LIB) -ljansson \
+	-L$(DIR_PCRE_LIB) -lpcre \
+	-lcurl
+
 
 ifeq ($(BUILD),release)
 	CFLAGS 	+= -O3 -s

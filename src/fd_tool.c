@@ -1,12 +1,12 @@
 /*
 ** Copyright 2014-2021 The Earlham Institute
-** 
+**
 ** Licensed under the Apache License, Version 2.0 (the "License");
 ** you may not use this file except in compliance with the License.
 ** You may obtain a copy of the License at
-** 
+**
 **     http://www.apache.org/licenses/LICENSE-2.0
-** 
+**
 ** Unless required by applicable law or agreed to in writing, software
 ** distributed under the License is distributed on an "AS IS" BASIS,
 ** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,7 +15,7 @@
 */
 /*
  * program_jobs.c
- * 
+ *
  *  Created on: 03 Apr 2021
  *      Author: billy
  */
@@ -29,17 +29,17 @@
 
 #include "typedefs.h"
 
-#define ALLOCATE_FD_UTIL_TAGS (1)
 #include "frictionless_data_util.h"
 
-
 #include "printer.h"
-#include "fd_json_util.h"
-#include "fd_string_util.h"
-#include <fd_filesystem_util.h>
+#include "json_util.h"
+#include "string_utils.h"
+#include "curl_tools.h"
+#include "filesystem_utils.h"
 
-#include "html.h"
-//#include "markdown_printer.h"
+#include "html_printer.h"
+#include "markdown_printer.h"
+#include "math_utils.h"
 
 
 typedef struct
@@ -59,8 +59,11 @@ static bool CreateCSVFile (const char *filename_s, const char *col_sep_s, const 
 
 static int SortPropertiesByOrder (const void *v0_p, const void *v1_p);
 
-static bool ParsePackageFromSchema (const json_t *data_p, const json_t *schema_p, Printer *printer_p, const bool full_flag);
+static bool ParsePackageFromSchema (const json_t *data_p, const json_t *schema_p, Printer *printer_p, const bool full_flag, const size_t indent_level);
 
+static char *GetOutputFilename (const char *dir_s, const char *name_s, const char *extension_s);
+
+static json_t *GetWebJSON (const char *url_s);
 
 
 /*
@@ -79,10 +82,10 @@ int main (int argc, char *argv [])
 					"\t--out-dir <directory>, the directory where the output files will be written to.\n"
 					"\t--data-fmt <format>, the format to write data resources in. Currently the options are:\n"
 					"\t\thtml, write the files in html format (default).\n"
-					"\t\md, write the files in markdown format.\n"
+					"\t\tmd, write the files in markdown format.\n"
 					"\t--table-fmt <format>, the format to write data resources in. Currently the options are:\n"
 					"\t\tcsv, write the files in csv format (default).\n"
-					"\t--full, show all properties even when the values are empty"
+					"\t--full, show all properties even when the values are empty\n"
 					);
 
 		}		/* if (argc < 3) */
@@ -250,7 +253,7 @@ int main (int argc, char *argv [])
 				  					  	  								if (OpenFDPrinter (printer_p, filename_s))
 				  					  	  									{
 				  					  	  										PrintHeader (printer_p, name_s, NULL);
-								  	  												ParsePackageFromSchema (resource_p, schema_p, printer_p, full_flag);
+								  	  												ParsePackageFromSchema (resource_p, schema_p, printer_p, full_flag, 0);
 
 
 				  					  	  										PrintFooter (printer_p, profile_s);
@@ -329,7 +332,7 @@ int main (int argc, char *argv [])
 				  	  	}
 
 
-				  		FreePrinter (printer_p);
+				  		FreeFDPrinter (printer_p);
 				  	}		/* if (printer_p) */
 
 				}		/* if (fd_file_s) */
@@ -452,7 +455,7 @@ static bool CreateCSVFile (const char *filename_s, const char *col_sep_s, const 
 																}
 															else
 																{
-																	PrintJSONObject (stderr, value_p, "Unknown JSON type: ");
+																	PrintJSON (stderr, value_p, "Unknown JSON type: ");
 																}
 														}
 
@@ -490,7 +493,7 @@ static bool CreateCSVFile (const char *filename_s, const char *col_sep_s, const 
 
 
 
-static bool ParsePackageFromSchema (const json_t *data_p, const json_t *schema_p, Printer *printer_p, const bool full_flag)
+static bool ParsePackageFromSchema (const json_t *data_p, const json_t *schema_p, Printer *printer_p, const bool full_flag, const size_t indent_level)
 {
 	bool result = false;
 	const json_t *required_entries_p = json_object_get (schema_p, "required");
@@ -609,7 +612,7 @@ static bool ParsePackageFromSchema (const json_t *data_p, const json_t *schema_p
 											double value;
 											double *number_value_p = NULL;
 
-											if (GetJSONNumber (data_p, key_s, &value))
+											if (GetJSONReal (data_p, key_s, &value))
 												{
 													number_value_p = &value;
 													print_flag = true;
@@ -639,10 +642,63 @@ static bool ParsePackageFromSchema (const json_t *data_p, const json_t *schema_p
 												}
 
 										}		/* else if (strcmp (type_s, FD_TYPE_BOOLEAN) == 0) */
-									else
+									else if (strcmp (type_s, FD_TYPE_JSON_ARRAY) == 0)
 										{
+											/*
+											 * Do we have a schema?
+											 */
+											const char *schema_uri_s = GetRefSchemaURI (property_p);
 
-										}
+											if (schema_uri_s)
+												{
+													if (DoesStringStartWith (schema_uri_s, "http"))
+														{
+															json_t *child_schema_p = GetWebJSON (schema_uri_s);
+
+															if (child_schema_p)
+																{
+																	const json_t *values_p = json_object_get (data_p, key_s);
+
+																	if (values_p)
+																		{
+																			if (json_is_array (values_p))
+																				{
+																					const json_t *entry_p;
+																					size_t j;
+																					const char *title_s = GetJSONString (property_p, key_s);
+
+																					if (!title_s)
+																						{
+																							title_s = key_s;
+																						}
+
+																					StartPrintSection (printer_p, title_s);
+
+																					json_array_foreach (values_p, j, entry_p)
+																						{
+																							if (!ParsePackageFromSchema (entry_p, child_schema_p, printer_p, full_flag, indent_level + 1))
+																								{
+																									fprintf (stderr, "Failed to parse \"%s\"\n", key_s);
+																								}
+
+																						}
+
+																					EndPrintSection (printer_p, NULL);
+
+																				}
+																		}
+
+
+
+																	json_decref (child_schema_p);
+																}		/*if (child_schema_p) */
+
+														}		/* if (DoesStringStartWith (schema_uri_s, "http")) */
+
+												}		/* if (schema_uri_s) */
+
+
+										}		/* else if (strcmp (type_s, FD_TYPE_JSON_ARRAY) == 0) */
 
 								}		/* if (type_s) */
 
@@ -678,3 +734,91 @@ static int SortPropertiesByOrder (const void *v0_p, const void *v1_p)
 
 	return res;
 }
+
+
+
+static char *GetOutputFilename (const char *dir_s, const char *name_s, const char *extension_s)
+{
+	char *filename_s = NULL;
+	char *copied_name_s = ConcatenateVarargsStrings (name_s, ".", extension_s, NULL);
+
+	if (copied_name_s)
+		{
+			/*
+			 * Replace any non file-system characters to
+			 * make sure that it is a valid filename.
+			 * The safest approach is to replace all
+			 * non-alphanumeric characters with an
+			 * underscore.
+			 */
+			char *c_p = copied_name_s;
+			size_t i = strlen (name_s);
+
+			for ( ; i > 0; -- i, ++ c_p)
+				{
+					if (isalnum (*c_p) == 0)
+						{
+							*c_p = '_';
+						}
+				}
+
+			if (dir_s)
+				{
+					if (EnsureDirectoryExists (dir_s))
+						{
+							filename_s = MakeFilename (dir_s, copied_name_s);
+						}
+					else
+						{
+							fprintf (stderr, "Failed to create output directory \"%s\"\n", dir_s);
+						}
+
+					FreeCopiedString (copied_name_s);
+				}		/* if (dir_s) */
+			else
+				{
+					filename_s = copied_name_s;
+				}
+
+		}		/* if (copied_name_s) */
+
+	return filename_s;
+}
+
+
+static json_t *GetWebJSON (const char *url_s)
+{
+	json_t *data_p = NULL;
+	CurlTool *curl_tool_p = AllocateCurlTool (CM_MEMORY);
+
+	if (curl_tool_p)
+		{
+			if (SetUriForCurlTool (curl_tool_p, url_s))
+				{
+					CURLcode res = RunCurlTool (curl_tool_p);
+
+					if (res == CURLE_OK)
+						{
+							const char *data_s = GetCurlToolData (curl_tool_p);
+
+
+							if (data_s)
+								{
+									json_error_t err;
+									data_p = json_loads (data_s, 0, &err);
+
+									//FreeCopiedString (data_s);
+								}
+						}
+				}
+
+			FreeCurlTool (curl_tool_p);
+		}
+
+	return data_p;
+}
+
+
+
+
+
