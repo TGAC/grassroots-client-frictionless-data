@@ -225,6 +225,10 @@ int main (int argc, char *argv [])
 						  	  						const char *name_s = GetJSONString (resource_p, FD_NAME_S);
 						  	  						char *filename_s = NULL;
 
+															if (!name_s)
+																{
+						  	  								name_s = GetJSONString (resource_p, FD_TABLE_FIELD_TITLE);
+																}
 
 				  	  								if (DoesStringStartWith (profile_s, "http"))
 				  	  									{
