@@ -46,13 +46,6 @@ SRCS 	:= \
 	markdown_printer.c \
 	printer.c \
 
-#ifeq ($(PLATFORM),unix)
-#	SRCS += unix_filesystem.c 
-#else ifeq ($(PLATFORM),windows)
-#	SRCS += windows_filesystem.c 
-#else ifeq ($(PLATFORM),amiga)
-#	SRCS += amiga_filesystem.c 	
-#endif
 
 LDFLAGS += 	\
 	-L$(DIR_GRASSROOTS_FRICTIONLESS_LIB) -l$(GRASSROOTS_FRICTIONLESS_LIB_NAME) \
@@ -68,13 +61,12 @@ ifeq ($(BUILD),release)
 	CFLAGS 	+= -O3 -s
  	LDFLAGS += -s 
 else
-#	CFLAGS 	+= -g
-	CFLAGS 	+= -g -pg
-	LDFLAGS += -pg
+	CFLAGS 	+= -g
 	CPPFLAGS += -D_DEBUG
 endif
 	
-
+	
+	
 CPPFLAGS += -DUNIX 
 
 CC := gcc
