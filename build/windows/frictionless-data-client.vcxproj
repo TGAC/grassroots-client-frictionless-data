@@ -23,6 +23,7 @@
     <ProjectGuid>{B459EBA5-01D0-4D01-A261-9565AE2D71D7}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <ProjectName>grassroots-fd-tool</ProjectName>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -65,34 +66,46 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(ProjectDir)$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(ProjectDir)$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(ProjectDir)$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(ProjectDir)$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(ProjectDir)$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(ProjectDir)$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(ProjectDir)$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(ProjectDir)$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions);WINDOWS;WINDOWS;SHARED_LIBRARY</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions);WINDOWS;WINDOWS;SHARED_LIBRARY; _CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>D:\projects\grassroots\core\shared\network\include;D:\projects\grassroots\core\shared\util\include\io;D:\projects\grassroots\core\shared\util\include\containers;D:\projects\libbson\include;D:\projects\grassroots\libs\grassroots-frictionless-data\include;D:\projects\grassroots\core\shared\util\include;D:\jansson\include;..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\projects\grassroots\core\shared\network\include;D:\projects\grassroots\core\shared\util\include\io;D:\projects\grassroots\core\shared\util\include\containers;D:\projects\libbson\include;D:\projects\grassroots\libs\frictionless-data\include;D:\projects\grassroots\core\shared\util\include;D:\jansson\include;..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <TargetMachine>MachineX86</TargetMachine>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <AdditionalDependencies>grassroots_util.lib;grassroots_network.lib;jansson.lib;grassroots_fd.lib;grassroots_uuid.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>D:\projects\grassroots\libs\grassroots-frictionless-data\build\windows\grassroots_fd_lib\Debug;D:\jansson\lib;D:\projects\grassroots\core\shared\util\build\windows\grassroots_util\Debug;D:\projects\grassroots\core\shared\uuid\build\windows\Debug;D:\projects\grassroots\core\shared\network\build\windows\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\..\..\libs\frictionless-data\build\windows\$(Platform)\$(Configuration);;D:\jansson\lib;..\..\..\..\core\shared\util\build\windows\$(Platform)\$(Configuration);..\..\..\..\core\shared\uuid\build\windows\$(Platform)\$(Configuration);;..\..\..\..\core\shared\network\build\windows\$(Platform)\$(Configuration);;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions);WINDOWS;WINDOWS;SHARED_LIBRARY</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions);WINDOWS;WINDOWS;SHARED_LIBRARY; _CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <AdditionalIncludeDirectories>D:\projects\grassroots\core\shared\network\include;D:\projects\grassroots\core\shared\util\include\io;D:\projects\grassroots\core\shared\util\include\containers;D:\projects\libbson\include;D:\projects\grassroots\libs\grassroots-frictionless-data\include;D:\projects\grassroots\core\shared\util\include;D:\jansson\include;..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\projects\grassroots\core\shared\network\include;D:\projects\grassroots\core\shared\util\include\io;D:\projects\grassroots\core\shared\util\include\containers;D:\projects\libbson\include;D:\projects\grassroots\libs\frictionless-data\include;D:\projects\grassroots\core\shared\util\include;D:\jansson\include;..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <TargetMachine>MachineX86</TargetMachine>
@@ -101,27 +114,27 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>grassroots_util.lib;grassroots_network.lib;jansson.lib;grassroots_fd.lib;grassroots_uuid.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>D:\projects\grassroots\libs\grassroots-frictionless-data\build\windows\grassroots_fd_lib\Debug;D:\jansson\lib;D:\projects\grassroots\core\shared\util\build\windows\grassroots_util\Debug;D:\projects\grassroots\core\shared\uuid\build\windows\Debug;D:\projects\grassroots\core\shared\network\build\windows\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\..\..\libs\frictionless-data\build\windows\$(Platform)\$(Configuration);;D:\jansson\lib;..\..\..\..\core\shared\util\build\windows\$(Platform)\$(Configuration);..\..\..\..\core\shared\uuid\build\windows\$(Platform)\$(Configuration);;..\..\..\..\core\shared\network\build\windows\$(Platform)\$(Configuration);;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>D:\projects\grassroots\core\shared\network\include;D:\projects\grassroots\core\shared\util\include\io;D:\projects\grassroots\core\shared\util\include\containers;D:\projects\libbson\include;D:\projects\grassroots\libs\grassroots-frictionless-data\include;D:\projects\grassroots\core\shared\util\include;D:\jansson\include;..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>;WINDOWS;SHARED_LIBRARY</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>D:\projects\grassroots\core\shared\network\include;D:\projects\grassroots\core\shared\util\include\io;D:\projects\grassroots\core\shared\util\include\containers;D:\projects\libbson\include;D:\projects\grassroots\libs\frictionless-data\include;D:\projects\grassroots\core\shared\util\include;D:\jansson\include;..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>;WINDOWS;SHARED_LIBRARY; _CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <AdditionalDependencies>grassroots_util.lib;grassroots_network.lib;jansson.lib;grassroots_fd.lib;grassroots_uuid.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>D:\projects\grassroots\libs\grassroots-frictionless-data\build\windows\grassroots_fd_lib\Debug;D:\jansson\lib;D:\projects\grassroots\core\shared\util\build\windows\grassroots_util\Debug;D:\projects\grassroots\core\shared\uuid\build\windows\Debug;D:\projects\grassroots\core\shared\network\build\windows\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\..\..\libs\frictionless-data\build\windows\$(Platform)\$(Configuration);;D:\jansson\lib;..\..\..\..\core\shared\util\build\windows\$(Platform)\$(Configuration);;..\..\..\..\core\shared\uuid\build\windows\$(Platform)\$(Configuration);;..\..\..\..\core\shared\network\build\windows\$(Platform)\$(Configuration);;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>D:\projects\grassroots\core\shared\network\include;D:\projects\grassroots\core\shared\util\include\io;D:\projects\grassroots\core\shared\util\include\containers;D:\projects\libbson\include;D:\projects\grassroots\libs\grassroots-frictionless-data\include;D:\projects\grassroots\core\shared\util\include;D:\jansson\include;..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>;WINDOWS;SHARED_LIBRARY</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>D:\projects\grassroots\core\shared\network\include;D:\projects\grassroots\core\shared\util\include\io;D:\projects\grassroots\core\shared\util\include\containers;D:\projects\libbson\include;D:\projects\grassroots\libs\frictionless-data\include;D:\projects\grassroots\core\shared\util\include;D:\jansson\include;..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>;WINDOWS;SHARED_LIBRARY; _CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <AdditionalDependencies>grassroots_util.lib;grassroots_network.lib;jansson.lib;grassroots_fd.lib;grassroots_uuid.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>D:\projects\grassroots\libs\grassroots-frictionless-data\build\windows\grassroots_fd_lib\Debug;D:\jansson\lib;D:\projects\grassroots\core\shared\util\build\windows\grassroots_util\Debug;D:\projects\grassroots\core\shared\uuid\build\windows\Debug;D:\projects\grassroots\core\shared\network\build\windows\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\..\..\libs\frictionless-data\build\windows\$(Platform)\$(Configuration);;D:\jansson\lib;..\..\..\..\core\shared\util\build\windows\$(Platform)\$(Configuration);;..\..\..\..\core\shared\uuid\build\windows\$(Platform)\$(Configuration);;..\..\..\..\core\shared\network\build\windows\$(Platform)\$(Configuration);;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
