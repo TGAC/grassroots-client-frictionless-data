@@ -256,11 +256,17 @@ int main (int argc, char *argv [])
 				  					  	  							{
 				  					  	  								if (OpenFDPrinter (printer_p, filename_s))
 				  					  	  									{
+				  					  	  										char *footer_s = ConcatenateVarargsStrings ("Parsed ", filename_s, " using profile ", profile_s, NULL);
 				  					  	  										PrintHeader (printer_p, name_s, NULL);
 								  	  												ParsePackageFromSchema (resource_p, schema_p, printer_p, full_flag, 0);
 
 
-				  					  	  										PrintFooter (printer_p, profile_s);
+				  					  	  										if (footer_s)
+				  					  	  											{
+						  					  	  										PrintFooter (printer_p, footer_s);
+						  					  	  										FreeCopiedString (footer_s);
+				  					  	  											}
+
 				  					  	  										CloseFDPrinter (printer_p);
 				  					  	  									}		/* if (OpenPrinter (printer_p, filename_s)) */
 
@@ -285,6 +291,11 @@ int main (int argc, char *argv [])
 				  	  											{
 				  	  												const char *col_sep_s = ",";
 				  	  												const char *row_sep_s = "\n";
+
+										  	  						if (!name_s)
+																				{
+																					name_s = GetJSONString (schema_p, FD_TITLE_S);
+																				}
 
 				  					  	  						if (name_s)
 				  					  	  							{
