@@ -256,7 +256,7 @@ int main (int argc, char *argv [])
 				  					  	  							{
 				  					  	  								if (OpenFDPrinter (printer_p, filename_s))
 				  					  	  									{
-				  					  	  										char *footer_s = ConcatenateVarargsStrings ("Parsed ", filename_s, " using profile ", profile_s, NULL);
+				  					  	  										char *footer_s = ConcatenateVarargsStrings ("Parsed ", fd_file_s, " using profile ", profile_s, NULL);
 				  					  	  										PrintHeader (printer_p, name_s, NULL);
 								  	  												ParsePackageFromSchema (resource_p, schema_p, printer_p, full_flag, 0);
 
@@ -292,10 +292,6 @@ int main (int argc, char *argv [])
 				  	  												const char *col_sep_s = ",";
 				  	  												const char *row_sep_s = "\n";
 
-										  	  						if (!name_s)
-																				{
-																					name_s = GetJSONString (schema_p, FD_TITLE_S);
-																				}
 
 				  					  	  						if (name_s)
 				  					  	  							{
@@ -315,6 +311,7 @@ int main (int argc, char *argv [])
 
 				  					  	  						if (filename_s)
 				  					  	  							{
+
 						  	  												if (CreateCSVFile (filename_s, col_sep_s, row_sep_s, headers_p, data_p))
 						  	  													{
 
@@ -325,6 +322,7 @@ int main (int argc, char *argv [])
 
 
 				  	  											}
+
 
 				  	  									}		/* if (strcmp (profile_s, FD_PROFILE_TABULAR_RESOURCE_S) == 0) */
 
@@ -542,6 +540,7 @@ static bool ParsePackageFromSchema (const json_t *data_p, const json_t *schema_p
 					 * Sort the keys into order
 					 */
 					qsort (sorted_properties_p, num_properties, sizeof (JSONProperty), SortPropertiesByOrder);
+
 
 					/*
 					 * Now read in the values in order
