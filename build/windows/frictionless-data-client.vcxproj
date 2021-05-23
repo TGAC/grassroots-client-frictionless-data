@@ -98,6 +98,9 @@
       <AdditionalDependencies>grassroots_util.lib;grassroots_network.lib;jansson.lib;grassroots_fd.lib;grassroots_uuid.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>..\..\..\..\libs\frictionless-data\build\windows\$(Platform)\$(Configuration);;D:\jansson\lib;..\..\..\..\core\shared\util\build\windows\$(Platform)\$(Configuration);..\..\..\..\core\shared\uuid\build\windows\$(Platform)\$(Configuration);;..\..\..\..\core\shared\network\build\windows\$(Platform)\$(Configuration);;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
+    <PostBuildEvent>
+      <Command>copy $(OutDir)$(TargetName)$(TargetExt) d:\grassroots\$(Configuration)\$(Platform)</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -116,6 +119,9 @@
       <AdditionalDependencies>grassroots_util.lib;grassroots_network.lib;jansson.lib;grassroots_fd.lib;grassroots_uuid.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>..\..\..\..\libs\frictionless-data\build\windows\$(Platform)\$(Configuration);;D:\jansson\lib;..\..\..\..\core\shared\util\build\windows\$(Platform)\$(Configuration);..\..\..\..\core\shared\uuid\build\windows\$(Platform)\$(Configuration);;..\..\..\..\core\shared\network\build\windows\$(Platform)\$(Configuration);;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
+    <PostBuildEvent>
+      <Command>copy $(OutDir)$(TargetName)$(TargetExt) d:\grassroots\$(Configuration)\$(Platform)</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -126,6 +132,9 @@
       <AdditionalDependencies>grassroots_util.lib;grassroots_network.lib;jansson.lib;grassroots_fd.lib;grassroots_uuid.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>..\..\..\..\libs\frictionless-data\build\windows\$(Platform)\$(Configuration);;D:\jansson\lib;..\..\..\..\core\shared\util\build\windows\$(Platform)\$(Configuration);;..\..\..\..\core\shared\uuid\build\windows\$(Platform)\$(Configuration);;..\..\..\..\core\shared\network\build\windows\$(Platform)\$(Configuration);;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
+    <PostBuildEvent>
+      <Command>copy $(OutDir)$(TargetName)$(TargetExt) d:\grassroots\$(Configuration)\$(Platform)</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -136,6 +145,9 @@
       <AdditionalDependencies>grassroots_util.lib;grassroots_network.lib;jansson.lib;grassroots_fd.lib;grassroots_uuid.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>..\..\..\..\libs\frictionless-data\build\windows\$(Platform)\$(Configuration);;D:\jansson\lib;..\..\..\..\core\shared\util\build\windows\$(Platform)\$(Configuration);;..\..\..\..\core\shared\uuid\build\windows\$(Platform)\$(Configuration);;..\..\..\..\core\shared\network\build\windows\$(Platform)\$(Configuration);;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
+    <PostBuildEvent>
+      <Command>copy $(OutDir)$(TargetName)$(TargetExt) d:\grassroots\$(Configuration)\$(Platform)</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\fd_tool.c" />
