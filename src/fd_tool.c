@@ -14,7 +14,7 @@
 ** limitations under the License.
 */
 /*
- * program_jobs.c
+ * fd_tool.c
  *
  *  Created on: 03 Apr 2021
  *      Author: billy
@@ -77,7 +77,7 @@ int main (int argc, char *argv [])
 	if (argc < 3)
 		{
 			printf (
-					"USAGE: grassroots-fd-tool\n"
+					"USAGE: grassroots_fd_tool\n"
 					"\t--in <filename>, the Frictionless Data Package filename to extract the resources from.\n"
 					"\t--out-dir <directory>, the directory where the output files will be written to.\n"
 					"\t--data-fmt <format>, the format to write data resources in. Currently the options are:\n"
@@ -105,6 +105,7 @@ int main (int argc, char *argv [])
 
 			PrinterFormat data_format = PRINTER_FORMAT_HTML;
 			const char *data_format_s = "html";
+			bool out_dir_ok_flag = false;
 
 			while (i < argc)
 				{
@@ -178,177 +179,205 @@ int main (int argc, char *argv [])
 					++ i;
 				}
 
-			if (fd_file_s)
+			if (out_dir_s)
 				{
-				  Printer *printer_p = NULL;
-					const char *data_ext_s = NULL;
-
-				  switch (data_format)
+					if (EnsureDirectoryExists (out_dir_s))
 						{
-							case PRINTER_FORMAT_HTML:
-								{
-									printer_p = AllocateHTMLPrinter ();
-									data_ext_s = "html";
-								}
-								break;
+							out_dir_ok_flag = true;
+						}		/* if (!EnsureDirectoryExists (out_dir_s)) */
+				}		/* if (out_dir_s) */
+			else
+				{
+					out_dir_ok_flag = true;
+				}
 
-							case PRINTER_FORMAT_MARKDOWN:
+			if (out_dir_ok_flag)
+				{
+					if (fd_file_s)
+						{
+							Printer *printer_p = NULL;
+							const char *data_ext_s = NULL;
+
+							switch (data_format)
 								{
-	//								printer_p = AllocateMarkdownPrinter ();
-									data_ext_s = "md";
+									case PRINTER_FORMAT_HTML:
+										{
+											printer_p = AllocateHTMLPrinter ();
+											data_ext_s = "html";
+										}
+										break;
+
+									case PRINTER_FORMAT_MARKDOWN:
+										{
+											printer_p = AllocateMarkdownPrinter ();
+											data_ext_s = "md";
+										}
+										break;
 								}
-								break;
+
+
+							if (printer_p)
+								{
+									json_error_t err;
+									json_t *fd_p = json_load_file (fd_file_s, 0, &err);
+
+									if (fd_p)
+										{
+											const json_t *resources_p = json_object_get (fd_p, FD_RESOURCES_S);
+
+											if (resources_p)
+												{
+													size_t j;
+													const json_t *resource_p;
+
+													json_array_foreach (resources_p, j, resource_p)
+														{
+
+															const char *profile_s = GetJSONString (resource_p, FD_PROFILE_S);
+
+															if (profile_s)
+																{
+																	const char *name_s = GetJSONString (resource_p, FD_NAME_S);
+																	char *filename_s = NULL;
+
+																	if (!name_s)
+																		{
+																			name_s = GetJSONString (resource_p, FD_TABLE_FIELD_TITLE);
+																		}
+
+																	if (DoesStringStartWith (profile_s, "http"))
+																		{
+																			json_t *schema_p = GetWebJSON (profile_s);
+
+																			if (schema_p)
+																				{
+																					if (name_s)
+																						{
+																							filename_s = GetOutputFilename (out_dir_s, name_s, data_ext_s);
+																						}		/* if (name_s) */
+																					else
+																						{
+																							char *temp_s = ConvertSizeTToString (j);
+
+																							if (temp_s)
+																								{
+																									filename_s = GetOutputFilename (out_dir_s, temp_s, data_ext_s);
+																									FreeCopiedString (temp_s);
+																								}
+
+																						}
+
+																					if (filename_s)
+																						{
+																							if (OpenFDPrinter (printer_p, filename_s))
+																								{
+																									char *footer_s = ConcatenateVarargsStrings ("Parsed ", fd_file_s, " using profile ", profile_s, NULL);
+																									PrintHeader (printer_p, name_s, NULL);
+																									ParsePackageFromSchema (resource_p, schema_p, printer_p, full_flag, 0);
+
+
+																									if (footer_s)
+																										{
+																											PrintFooter (printer_p, footer_s);
+																											FreeCopiedString (footer_s);
+																										}
+
+																									CloseFDPrinter (printer_p);
+																								}		/* if (OpenPrinter (printer_p, filename_s)) */
+																							else
+																								{
+																									printf ("Failed to open \"%s\" for to write to.\n", filename_s);
+																								}
+
+																							FreeCopiedString (filename_s);
+																						}		/* if (filename_s) */
+
+																				}		/* if (schema_p) */
+																		}
+																	else if (strcmp (profile_s, FD_PROFILE_TABULAR_RESOURCE_S) == 0)
+																		{
+																			const json_t *schema_p = json_object_get (resource_p, FD_SCHEMA_S);
+																			const json_t *data_p = json_object_get (resource_p, FD_DATA_S);
+																			const json_t *headers_p = NULL;
+
+																			if (schema_p)
+																				{
+																					headers_p = json_object_get (schema_p, FD_TABLE_FIELDS_S);
+																				}
+
+																			if (data_p)
+																				{
+																					const char *col_sep_s = ",";
+																					const char *row_sep_s = "\n";
+
+
+																					if (name_s)
+																						{
+																							filename_s = GetOutputFilename (out_dir_s, name_s, table_format_s);
+																						}		/* if (name_s) */
+																					else
+																						{
+																							char *temp_s = ConvertSizeTToString (j);
+
+																							if (temp_s)
+																								{
+																									filename_s = GetOutputFilename (out_dir_s, temp_s, table_format_s);
+																									FreeCopiedString (temp_s);
+																								}
+
+																						}
+
+																					if (filename_s)
+																						{
+
+																							if (CreateCSVFile (filename_s, col_sep_s, row_sep_s, headers_p, data_p))
+																								{
+
+																								}
+
+																							FreeCopiedString (filename_s);
+																						}		/* if (filename_s) */
+
+
+																				}
+
+
+																		}		/* if (strcmp (profile_s, FD_PROFILE_TABULAR_RESOURCE_S) == 0) */
+
+																}		/* if (profile_s) */
+
+
+														}		/* json_array_foreach (resources_p, i, resource_p) */
+
+												}		/* if (resources_p) */
+											else
+												{
+													printf ("%s does not contain a resources array so nothing to do!\n", fd_file_s);
+												}
+
+											json_decref (fd_p);
+										}		/* if (fd_p) */
+									else
+										{
+											printf ("Failed to load %s as a JSON file\n", fd_file_s);
+										}
+
+
+									FreeFDPrinter (printer_p);
+								}		/* if (printer_p) */
+
+						}		/* if (fd_file_s) */
+					else
+						{
+							printf ("No intput file specified\n");
 						}
 
+				}		/* if (out_dir_ok_flag) */
+			else
+				{
+					printf ("Couldn't write to output directory \"%s\"\n", out_dir_s);
+				}
 
-				  if (printer_p)
-				  	{
-				  		json_error_t err;
-				  	  json_t *fd_p = json_load_file (fd_file_s, 0, &err);
-
-				  	  if (fd_p)
-				  	  	{
-				  	  		const json_t *resources_p = json_object_get (fd_p, FD_RESOURCES_S);
-
-				  	  		if (resources_p)
-				  	  			{
-				  	  				size_t j;
-				  	  				const json_t *resource_p;
-
-				  	  				json_array_foreach (resources_p, j, resource_p)
-				  							{
-
-				  	  						const char *profile_s = GetJSONString (resource_p, FD_PROFILE_S);
-
-				  	  						if (profile_s)
-				  	  							{
-						  	  						const char *name_s = GetJSONString (resource_p, FD_NAME_S);
-						  	  						char *filename_s = NULL;
-
-															if (!name_s)
-																{
-						  	  								name_s = GetJSONString (resource_p, FD_TABLE_FIELD_TITLE);
-																}
-
-				  	  								if (DoesStringStartWith (profile_s, "http"))
-				  	  									{
-				  	  										json_t *schema_p = GetWebJSON (profile_s);
-
-				  	  										if (schema_p)
-				  	  											{
-				  					  	  						if (name_s)
-				  					  	  							{
-				  					  	  								filename_s = GetOutputFilename (out_dir_s, name_s, data_ext_s);
-				  					  	  							}		/* if (name_s) */
-				  					  	  						else
-				  					  	  							{
-				  					  	  								char *temp_s = ConvertSizeTToString (j);
-
-				  					  	  								if (temp_s)
-				  					  	  									{
-				  					  	  										filename_s = GetOutputFilename (out_dir_s, temp_s, data_ext_s);
-				  					  	  										FreeCopiedString (temp_s);
-				  					  	  									}
-
-				  					  	  							}
-
-				  					  	  						if (filename_s)
-				  					  	  							{
-				  					  	  								if (OpenFDPrinter (printer_p, filename_s))
-				  					  	  									{
-				  					  	  										char *footer_s = ConcatenateVarargsStrings ("Parsed ", fd_file_s, " using profile ", profile_s, NULL);
-				  					  	  										PrintHeader (printer_p, name_s, NULL);
-								  	  												ParsePackageFromSchema (resource_p, schema_p, printer_p, full_flag, 0);
-
-
-				  					  	  										if (footer_s)
-				  					  	  											{
-						  					  	  										PrintFooter (printer_p, footer_s);
-						  					  	  										FreeCopiedString (footer_s);
-				  					  	  											}
-
-				  					  	  										CloseFDPrinter (printer_p);
-				  					  	  									}		/* if (OpenPrinter (printer_p, filename_s)) */
-
-
-				  							  	  						FreeCopiedString (filename_s);
-				  					  	  							}		/* if (filename_s) */
-
-				  	  											}		/* if (schema_p) */
-				  	  									}
-				  	  								else if (strcmp (profile_s, FD_PROFILE_TABULAR_RESOURCE_S) == 0)
-				  	  									{
-						  	  								const json_t *schema_p = json_object_get (resource_p, FD_SCHEMA_S);
-				  	  										const json_t *data_p = json_object_get (resource_p, FD_DATA_S);
-				  	  										const json_t *headers_p = NULL;
-
-				  	  										if (schema_p)
-				  	  											{
-				  	  												headers_p = json_object_get (schema_p, FD_TABLE_FIELDS_S);
-				  	  											}
-
-				  	  										if (data_p)
-				  	  											{
-				  	  												const char *col_sep_s = ",";
-				  	  												const char *row_sep_s = "\n";
-
-
-				  					  	  						if (name_s)
-				  					  	  							{
-				  					  	  								filename_s = GetOutputFilename (out_dir_s, name_s, table_format_s);
-				  					  	  							}		/* if (name_s) */
-				  					  	  						else
-				  					  	  							{
-				  					  	  								char *temp_s = ConvertSizeTToString (j);
-
-				  					  	  								if (temp_s)
-				  					  	  									{
-				  					  	  										filename_s = GetOutputFilename (out_dir_s, temp_s, table_format_s);
-				  					  	  										FreeCopiedString (temp_s);
-				  					  	  									}
-
-				  					  	  							}
-
-				  					  	  						if (filename_s)
-				  					  	  							{
-
-						  	  												if (CreateCSVFile (filename_s, col_sep_s, row_sep_s, headers_p, data_p))
-						  	  													{
-
-						  	  													}
-
-				  							  	  						FreeCopiedString (filename_s);
-				  					  	  							}		/* if (filename_s) */
-
-
-				  	  											}
-
-
-				  	  									}		/* if (strcmp (profile_s, FD_PROFILE_TABULAR_RESOURCE_S) == 0) */
-
-				  	  							}		/* if (profile_s) */
-
-
-				  							}		/* json_array_foreach (resources_p, i, resource_p) */
-
-				  	  			}		/* if (resources_p) */
-				  	  	  else
-				  	  	  	{
-				  	  	  		fprintf (stderr, "%s does not contain a resources array so nothing to do!\n", fd_file_s);
-				  	  	  	}
-
-				  	  		json_decref (fd_p);
-				  	  	}		/* if (fd_p) */
-				  	  else
-				  	  	{
-				  	  		fprintf (stderr, "Failed to load %s as a JSON file\n", fd_file_s);
-				  	  	}
-
-
-				  		FreeFDPrinter (printer_p);
-				  	}		/* if (printer_p) */
-
-				}		/* if (fd_file_s) */
 
 		}		/* if (argc < 3) else */
 
