@@ -5,7 +5,13 @@ to generate the reports. It has in-built support for tabular-data-resources and 
 
 ## Installation
 
-The *grassroots_fd_tool* package can be downloaded from [https://github.com/TGAC/grassroots-client-frictionless-data/releases/](https://github.com/TGAC/grassroots-client-frictionless-data/releases/). Currently there are versions for Linux and Windows with more platforms to follow. 
+The *grassroots_fd_tool* package can be downloaded from [https://github.com/TGAC/grassroots-client-frictionless-data/releases/](https://github.com/TGAC/grassroots-client-frictionless-data/releases/). Currently there are versions for Linux and Windows with more platforms to follow. For Linux, you will also need to install libcurl which you can do with  
+
+```
+sudo apt install libcurl4-openssl-dev
+```
+
+or using a similar method depending upon your distribution.
 
 
 ## Usage
