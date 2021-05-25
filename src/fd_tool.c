@@ -303,6 +303,12 @@ int main (int argc, char *argv [])
 																			if (schema_p)
 																				{
 																					headers_p = json_object_get (schema_p, FD_TABLE_FIELDS_S);
+
+																					if (!name_s)
+																						{
+																							name_s = GetJSONString (schema_p, FD_TITLE_S);
+																						}
+
 																				}
 
 																			if (data_p)
