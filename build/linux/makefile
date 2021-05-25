@@ -1,4 +1,4 @@
-NAME := grassroots_frictionless_data_tool
+NAME := grassroots_fd_tool
 DIR_BUILD :=  $(realpath $(dir $(lastword $(MAKEFILE_LIST))))
 DIR_SRC := $(realpath $(DIR_BUILD)/../../src)
 DIR_INCLUDE := $(realpath $(DIR_BUILD)/../../include)

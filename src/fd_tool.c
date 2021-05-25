@@ -49,6 +49,11 @@ typedef struct
 } JSONProperty;
 
 
+static const uint32 S_VERSION_MAJOR = 0;
+static const uint32 S_VERSION_MINOR = 9;
+static const uint32 S_VERSION_REV = 0;
+
+
 /*
  * static declarations
  */
@@ -74,7 +79,7 @@ int main (int argc, char *argv [])
 {
 	int res = 0;
 
-	if (argc < 3)
+	if (argc < 2)
 		{
 			printf (
 					"USAGE: grassroots_fd_tool\n"
@@ -86,6 +91,7 @@ int main (int argc, char *argv [])
 					"\t--table-fmt <format>, the format to write data resources in. Currently the options are:\n"
 					"\t\tcsv, write the files in csv format (default).\n"
 					"\t--full, show all properties even when the values are empty\n"
+					"\t--ver, display program version information\n"
 					);
 
 		}		/* if (argc < 3) */
@@ -104,7 +110,6 @@ int main (int argc, char *argv [])
 			} PrinterFormat;
 
 			PrinterFormat data_format = PRINTER_FORMAT_HTML;
-			const char *data_format_s = "html";
 			bool out_dir_ok_flag = false;
 
 			while (i < argc)
@@ -170,6 +175,10 @@ int main (int argc, char *argv [])
 					else if (strcmp (argv [i], "--full") == 0)
 						{
 							full_flag = true;
+						}
+					else if (strcmp (argv [i], "--ver") == 0)
+						{
+							printf ("VER: grassroots_fd_tool %u.%u.%u (%s)\n", S_VERSION_MAJOR, S_VERSION_MINOR, S_VERSION_REV, __DATE__);
 						}
 					else
 						{
