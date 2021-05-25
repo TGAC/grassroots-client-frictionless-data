@@ -1,13 +1,11 @@
 # Grassroots Frictionless Data Tool
 
 This is a command-line tool to extract the resources within a [Frictionless Data Package](https://frictionlessdata.io/) into a variety of formats such as Markdown, HTML, CSV, *etc.* It will be available for as many different platforms as possible. It uses the schemas for each resource within the Data Package
-to generate the reports. It has in-built support for tabular-data-resources and will download and parse any web-based schemas from the resource profiles and use these when they are specified.
+to generate the reports. It has in-built support for tabular-data-resources and will download and parse any web-based schemas from the resource profiles and use these when they are specified. It will output a file for each Data Resource within the Data Package.
 
 ## Installation
 
-The *grassroots_fd_tool* package can be downloaded from [https://github.com/TGAC/grassroots-client-frictionless-data/releases/](https://github.com/TGAC/grassroots-client-frictionless-data/releases/). Currently there are versions for Linux and Windows wiuth more platforms to follow. 
-
-
+The *grassroots_fd_tool* package can be downloaded from [https://github.com/TGAC/grassroots-client-frictionless-data/releases/](https://github.com/TGAC/grassroots-client-frictionless-data/releases/). Currently there are versions for Linux and Windows with more platforms to follow. 
 
 
 ## Usage
