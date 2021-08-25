@@ -241,8 +241,8 @@ int main (int argc, char *argv [])
 
 													json_array_foreach (resources_p, j, resource_p)
 														{
-
 															const char *profile_s = GetJSONString (resource_p, FD_PROFILE_S);
+
 
 															if (profile_s)
 																{
