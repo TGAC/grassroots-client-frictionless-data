@@ -37,7 +37,8 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:fd_libs
 ```
 
 in a terminal and then you can use `grassroots_fd_tool` as above.
- 
+
+
 ## History
 
  * 0.9.0 (2021/05/25): Initial version
