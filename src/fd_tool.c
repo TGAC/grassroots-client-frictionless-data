@@ -64,7 +64,7 @@ static bool CreateCSVFile (const char *filename_s, const char *col_sep_s, const 
 
 static int SortPropertiesByOrder (const void *v0_p, const void *v1_p);
 
-static bool ParsePackageFromSchema (const json_t *data_p, const json_t *schema_p, Printer *printer_p, const bool full_flag, const size_t indent_level);
+static bool ParsePackageFromSchema (const json_t *data_p, const json_t *schema_p, Printer *printer_p, const bool full_flag, const bool debug_flag, const size_t indent_level);
 
 static char *GetOutputFilename (const char *dir_s, const char *name_s, const char *extension_s);
 
@@ -92,6 +92,7 @@ int main (int argc, char *argv [])
 					"\t\tcsv, write the files in csv format (default).\n"
 					"\t--full, show all properties even when the values are empty\n"
 					"\t--ver, display program version information\n"
+					"\t--chatty, display program progress information\n"
 					);
 
 		}		/* if (argc < 3) */
@@ -102,6 +103,7 @@ int main (int argc, char *argv [])
 			const char *out_dir_s = NULL;
 			const char *table_format_s = "csv";
 			bool full_flag = false;
+			bool debug_flag = false;
 
 			typedef enum
 			{
@@ -175,6 +177,10 @@ int main (int argc, char *argv [])
 					else if (strcmp (argv [i], "--full") == 0)
 						{
 							full_flag = true;
+						}
+					else if (strcmp (argv [i], "--chatty") == 0)
+						{
+							debug_flag = true;
 						}
 					else if (strcmp (argv [i], "--ver") == 0)
 						{
@@ -282,7 +288,7 @@ int main (int argc, char *argv [])
 																								{
 																									char *footer_s = ConcatenateVarargsStrings ("Parsed ", fd_file_s, " using profile ", profile_s, NULL);
 																									PrintHeader (printer_p, name_s, NULL);
-																									ParsePackageFromSchema (resource_p, schema_p, printer_p, full_flag, 0);
+																									ParsePackageFromSchema (resource_p, schema_p, printer_p, full_flag, debug_flag, 0);
 
 
 																									if (footer_s)
@@ -550,11 +556,17 @@ static bool CreateCSVFile (const char *filename_s, const char *col_sep_s, const 
 
 
 
-static bool ParsePackageFromSchema (const json_t *data_p, const json_t *schema_p, Printer *printer_p, const bool full_flag, const size_t indent_level)
+static bool ParsePackageFromSchema (const json_t *data_p, const json_t *schema_p, Printer *printer_p, const bool full_flag, const bool debug_flag, const size_t indent_level)
 {
 	bool result = false;
 	const json_t *required_entries_p = json_object_get (schema_p, "required");
 	const json_t *properties_p = json_object_get (schema_p, "properties");
+
+	if (debug_flag)
+		{
+			PrintJSON (stdout, data_p, "processing ");
+			PrintJSON (stdout, schema_p, "schema ");
+		}
 
 	if (properties_p)
 		{
@@ -564,6 +576,7 @@ static bool ParsePackageFromSchema (const json_t *data_p, const json_t *schema_p
 			 */
 			const size_t num_properties = json_object_size (properties_p);
 			JSONProperty *sorted_properties_p = calloc (num_properties, sizeof (JSONProperty));
+			size_t total_required_entries = json_array_size (required_entries_p);
 
 			if (sorted_properties_p)
 				{
@@ -571,6 +584,7 @@ static bool ParsePackageFromSchema (const json_t *data_p, const json_t *schema_p
 					json_t *value_p;
 					JSONProperty *sorted_property_p = sorted_properties_p;
 					size_t i = num_properties;
+					size_t num_required_entries_found = 0;
 
 					json_object_foreach (properties_p, key_s, value_p)
 						{
@@ -605,10 +619,9 @@ static bool ParsePackageFromSchema (const json_t *data_p, const json_t *schema_p
 
 									if (required_entries_p)
 										{
-											size_t num_required_entries = json_array_size (required_entries_p);
 											size_t j = 0;
 
-											for (j = 0; j < num_required_entries; ++ j)
+											for (j = 0; j < total_required_entries; ++ j)
 												{
 													json_t *entry_p = json_array_get (required_entries_p, j);
 
@@ -619,7 +632,7 @@ static bool ParsePackageFromSchema (const json_t *data_p, const json_t *schema_p
 															if (strcmp (key_s, req_s) == 0)
 																{
 																	required_flag = true;
-																	j = num_required_entries;
+																	j = total_required_entries;
 																}
 
 														}
@@ -642,6 +655,11 @@ static bool ParsePackageFromSchema (const json_t *data_p, const json_t *schema_p
 															format_s = FD_TYPE_STRING_FORMAT_URI;
 														}
 
+													if (value_s && required_flag)
+														{
+															++ num_required_entries_found;
+														}
+
 													PrintString (printer_p, key_s, value_s, required_flag, format_s);
 												}
 
@@ -656,6 +674,12 @@ static bool ParsePackageFromSchema (const json_t *data_p, const json_t *schema_p
 												{
 													int_value_p = &value;
 													print_flag = true;
+
+													if (required_flag)
+														{
+															++ num_required_entries_found;
+														}
+
 												}
 
 											if (print_flag)
@@ -674,6 +698,11 @@ static bool ParsePackageFromSchema (const json_t *data_p, const json_t *schema_p
 												{
 													number_value_p = &value;
 													print_flag = true;
+
+													if (required_flag)
+														{
+															++ num_required_entries_found;
+														}
 												}
 
 											if (print_flag)
@@ -692,6 +721,11 @@ static bool ParsePackageFromSchema (const json_t *data_p, const json_t *schema_p
 												{
 													bool_value_p = &value;
 													print_flag = true;
+
+													if (required_flag)
+														{
+															++ num_required_entries_found;
+														}
 												}
 
 											if (print_flag)
@@ -734,7 +768,7 @@ static bool ParsePackageFromSchema (const json_t *data_p, const json_t *schema_p
 
 																					json_array_foreach (values_p, j, entry_p)
 																						{
-																							if (!ParsePackageFromSchema (entry_p, child_schema_p, printer_p, full_flag, indent_level + 1))
+																							if (!ParsePackageFromSchema (entry_p, child_schema_p, printer_p, full_flag, debug_flag, indent_level + 1))
 																								{
 																									fprintf (stderr, "Failed to parse \"%s\"\n", key_s);
 																								}
@@ -745,7 +779,6 @@ static bool ParsePackageFromSchema (const json_t *data_p, const json_t *schema_p
 
 																				}
 																		}
-
 
 
 																	json_decref (child_schema_p);
@@ -761,6 +794,14 @@ static bool ParsePackageFromSchema (const json_t *data_p, const json_t *schema_p
 								}		/* if (type_s) */
 
 						}		/* for (sorted_key_pp = sorted_keys_pp; i > 0; -- i, ++ sorted_key_pp) */
+
+					/*
+					 * Did we get all of the required fields?
+					 */
+					if (num_required_entries_found == total_required_entries)
+						{
+							result = true;
+						}
 
 					free (sorted_properties_p);
 				}		/* if ((sorted_keys_pp) */
