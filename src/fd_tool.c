@@ -51,7 +51,7 @@ typedef struct
 
 static const uint32 S_VERSION_MAJOR = 0;
 static const uint32 S_VERSION_MINOR = 9;
-static const uint32 S_VERSION_REV = 0;
+static const uint32 S_VERSION_REV = 1;
 
 
 /*

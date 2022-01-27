@@ -16,7 +16,7 @@ or using a similar method depending upon your distribution.
 
 ## Usage
 
-Currently this is a shell-based tool so needs to be run in a Power Shell or DOS prompt on Windows or in terminal on Linux. To run it type `grassroots_fd_tool` with the following command line parameters:
+Currently this is a shell-based tool so needs to be run in a Power Shell or DOS prompt on Windows or in a terminal on Linux. To run it type `grassroots_fd_tool` with the following command line parameters:
 
  * **--in** \<filename\>: The Frictionless Data Package filename to extract the resources from.
  * **--out-dir** \<directory\>: The directory where the output files will be written to.
