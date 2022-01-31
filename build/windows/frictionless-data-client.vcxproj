@@ -29,22 +29,22 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -53,15 +53,19 @@
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\..\..\core\grassroots.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\..\..\core\grassroots.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\..\..\core\grassroots.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\..\..\core\grassroots.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -125,12 +129,12 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>D:\projects\grassroots\core\shared\network\include;D:\projects\grassroots\core\shared\util\include\io;D:\projects\grassroots\core\shared\util\include\containers;D:\projects\libbson\include;D:\projects\grassroots\libs\frictionless-data\include;D:\projects\grassroots\core\shared\util\include;D:\jansson\include;..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(GrassrootsExtrasDir)\curl\include;D:\projects\grassroots\core\shared\network\include;D:\projects\grassroots\core\shared\util\include\io;D:\projects\grassroots\core\shared\util\include\containers;D:\projects\libbson\include;D:\projects\grassroots\libs\frictionless\include;D:\projects\grassroots\core\shared\util\include;$(GrassrootsExtrasDir)\mongodb-c\include\bson;$(GrassrootsExtrasDir)\jansson\include;..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>;WINDOWS;SHARED_LIBRARY; _CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>grassroots_util.lib;grassroots_network.lib;jansson.lib;grassroots_fd.lib;grassroots_uuid.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>..\..\..\..\libs\frictionless-data\build\windows\$(Platform)\$(Configuration);;D:\jansson\lib;..\..\..\..\core\shared\util\build\windows\$(Platform)\$(Configuration);;..\..\..\..\core\shared\uuid\build\windows\$(Platform)\$(Configuration);;..\..\..\..\core\shared\network\build\windows\$(Platform)\$(Configuration);;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>grassroots_util.lib;grassroots_network.lib;jansson.lib;grassroots_fd.lib;grassroots_uuid.lib;libcurl_imp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\..\..\..\libs\frictionless\build\windows\$(Platform)\$(Configuration);$(GrassrootsExtrasDir)\curl\lib;$(GrassrootsExtrasDir)\jansson\lib;..\..\..\..\core\shared\util\build\windows\$(Platform)\$(Configuration);..\..\..\..\core\shared\uuid\build\windows\$(Platform)\$(Configuration);..\..\..\..\core\shared\network\build\windows\$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>copy $(OutDir)$(TargetName)$(TargetExt) d:\grassroots\$(Configuration)\$(Platform)</Command>
@@ -138,12 +142,12 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>D:\projects\grassroots\core\shared\network\include;D:\projects\grassroots\core\shared\util\include\io;D:\projects\grassroots\core\shared\util\include\containers;D:\projects\libbson\include;D:\projects\grassroots\libs\frictionless-data\include;D:\projects\grassroots\core\shared\util\include;D:\jansson\include;..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(GrassrootsExtrasDir)\curl\include;D:\projects\grassroots\core\shared\network\include;D:\projects\grassroots\core\shared\util\include\io;D:\projects\grassroots\core\shared\util\include\containers;D:\projects\libbson\include;D:\projects\grassroots\libs\frictionless\include;D:\projects\grassroots\core\shared\util\include;$(GrassrootsExtrasDir)\mongodb-c\include\bson;$(GrassrootsExtrasDir)\jansson\include;..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>;WINDOWS;SHARED_LIBRARY; _CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>grassroots_util.lib;grassroots_network.lib;jansson.lib;grassroots_fd.lib;grassroots_uuid.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>..\..\..\..\libs\frictionless-data\build\windows\$(Platform)\$(Configuration);;D:\jansson\lib;..\..\..\..\core\shared\util\build\windows\$(Platform)\$(Configuration);;..\..\..\..\core\shared\uuid\build\windows\$(Platform)\$(Configuration);;..\..\..\..\core\shared\network\build\windows\$(Platform)\$(Configuration);;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>grassroots_util.lib;grassroots_network.lib;jansson.lib;grassroots_fd.lib;grassroots_uuid.lib;libcurl_imp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\..\..\..\libs\frictionless\build\windows\$(Platform)\$(Configuration);$(GrassrootsExtrasDir)\curl\lib;$(GrassrootsExtrasDir)\jansson\lib;..\..\..\..\core\shared\util\build\windows\$(Platform)\$(Configuration);..\..\..\..\core\shared\uuid\build\windows\$(Platform)\$(Configuration);..\..\..\..\core\shared\network\build\windows\$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>copy $(OutDir)$(TargetName)$(TargetExt) d:\grassroots\$(Configuration)\$(Platform)</Command>
