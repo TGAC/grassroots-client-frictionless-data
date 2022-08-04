@@ -888,7 +888,7 @@ static char *GetOutputFilename (const char *dir_s, const char *name_s, const cha
 static json_t *GetWebJSON (const char *url_s)
 {
 	json_t *data_p = NULL;
-	CurlTool *curl_tool_p = AllocateCurlTool (CM_MEMORY);
+	CurlTool *curl_tool_p = AllocateMemoryCurlTool (0);
 
 	if (curl_tool_p)
 		{
