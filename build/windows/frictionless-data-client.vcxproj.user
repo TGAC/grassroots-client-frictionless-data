@@ -11,7 +11,7 @@
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LocalDebuggerCommandArguments>--in "d:\grassroots\DFW Academic Toolkit Trial H2019.json" --out-dir d:\grassroots\Debug\Win32\out\</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>--in "d:\grassroots\DFW TKNIL Set 2 JIC, Harvest 2018 - Seedproduction.json" --out-dir d:\grassroots\Debug\</LocalDebuggerCommandArguments>
     <LocalDebuggerWorkingDirectory>d:\grassroots\$(Configuration)\$(Platform)\</LocalDebuggerWorkingDirectory>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
