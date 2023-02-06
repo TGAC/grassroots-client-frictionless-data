@@ -41,4 +41,5 @@ in a terminal and then you can use `grassroots_fd_tool` as above.
 
 ## History
 
+ * 0.9.1 (2022/01/25): Fixed error messages saying "failed to parse" for child schemas when thay had actually succeeded
  * 0.9.0 (2021/05/25): Initial version
