@@ -53,19 +53,27 @@
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\..\..\build-config\windows\dependencies.props" />
     <Import Project="..\..\..\..\build-config\windows\project.props" />
+    <Import Project="..\..\..\..\build-config\windows\dependencies-dev.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\..\..\build-config\windows\dependencies.props" />
     <Import Project="..\..\..\..\build-config\windows\project.props" />
+    <Import Project="..\..\..\..\build-config\windows\dependencies-dev.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\..\..\build-config\windows\dependencies.props" />
     <Import Project="..\..\..\..\build-config\windows\project.props" />
+    <Import Project="..\..\..\..\build-config\windows\dependencies-dev.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\..\..\build-config\windows\dependencies.props" />
     <Import Project="..\..\..\..\build-config\windows\project.props" />
+    <Import Project="..\..\..\..\build-config\windows\dependencies-dev.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -93,14 +101,14 @@
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>D:\projects\grassroots\core\shared\network\include;D:\projects\grassroots\core\shared\util\include\io;D:\projects\grassroots\core\shared\util\include\containers;D:\projects\libbson\include;D:\projects\grassroots\libs\frictionless-data\include;D:\projects\grassroots\core\shared\util\include;D:\jansson\include;..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include;$(DIR_CURL_INC);$(DIR_MONGODB_INC);$(DIR_BSON_INC);$(DIR_JANSSON_INC);$(DIR_GRASSROOTS_NETWORK_INC);$(DIR_GRASSROOTS_UTIL_INC);$(DIR_GRASSROOTS_UTIL_INC)\containers;$(DIR_GRASSROOTS_UTIL_INC)\io;$(DIR_GRASSROOTS_FRICTIONLESS_INC)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <TargetMachine>MachineX86</TargetMachine>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies>grassroots_util.lib;grassroots_network.lib;jansson.lib;grassroots_fd.lib;grassroots_uuid.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>..\..\..\..\libs\frictionless-data\build\windows\$(Platform)\$(Configuration);;D:\jansson\lib;..\..\..\..\core\shared\util\build\windows\$(Platform)\$(Configuration);..\..\..\..\core\shared\uuid\build\windows\$(Platform)\$(Configuration);;..\..\..\..\core\shared\network\build\windows\$(Platform)\$(Configuration);;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>$(CURL_LIB_NAME);$(JANSSON_LIB_NAME);$(BSON_LIB_NAME);$(MONGODB_LIB_NAME);$(GRASSROOTS_UUID_LIB_NAME);$(GRASSROOTS_FRICTIONLESS_LIB_NAME);$(GRASSROOTS_NETWORK_LIB_NAME);$(GRASSROOTS_UTIL_LIB_NAME);%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(DIR_CURL_LIB);$(DIR_GRASSROOTS_FRICTIONLESS_LIB);$(DIR_GRASSROOTS_NETWORK_LIB);$(DIR_GRASSROOTS_UUID_LIB);$(DIR_GRASSROOTS_UTIL_LIB);$(DIR_MONGODB_LIB);$(DIR_BSON_LIB);$(DIR_JANSSON_LIB)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>copy $(OutDir)$(TargetName)$(TargetExt) d:\grassroots\$(Configuration)\$(Platform)</Command>
@@ -112,7 +120,7 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <AdditionalIncludeDirectories>D:\projects\grassroots\core\shared\network\include;D:\projects\grassroots\core\shared\util\include\io;D:\projects\grassroots\core\shared\util\include\containers;D:\projects\libbson\include;D:\projects\grassroots\libs\frictionless-data\include;D:\projects\grassroots\core\shared\util\include;D:\jansson\include;..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include;$(DIR_CURL_INC);$(DIR_MONGODB_INC);$(DIR_BSON_INC);$(DIR_JANSSON_INC);$(DIR_GRASSROOTS_NETWORK_INC);$(DIR_GRASSROOTS_UTIL_INC);$(DIR_GRASSROOTS_UTIL_INC)\containers;$(DIR_GRASSROOTS_UTIL_INC)\io;$(DIR_GRASSROOTS_FRICTIONLESS_INC)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <TargetMachine>MachineX86</TargetMachine>
@@ -120,8 +128,8 @@
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>grassroots_util.lib;grassroots_network.lib;jansson.lib;grassroots_fd.lib;grassroots_uuid.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>..\..\..\..\libs\frictionless-data\build\windows\$(Platform)\$(Configuration);;D:\jansson\lib;..\..\..\..\core\shared\util\build\windows\$(Platform)\$(Configuration);..\..\..\..\core\shared\uuid\build\windows\$(Platform)\$(Configuration);;..\..\..\..\core\shared\network\build\windows\$(Platform)\$(Configuration);;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>$(CURL_LIB_NAME);$(JANSSON_LIB_NAME);$(BSON_LIB_NAME);$(MONGODB_LIB_NAME);$(GRASSROOTS_UUID_LIB_NAME);$(GRASSROOTS_FRICTIONLESS_LIB_NAME);$(GRASSROOTS_NETWORK_LIB_NAME);$(GRASSROOTS_UTIL_LIB_NAME);%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(DIR_CURL_LIB);$(DIR_GRASSROOTS_FRICTIONLESS_LIB);$(DIR_GRASSROOTS_NETWORK_LIB);$(DIR_GRASSROOTS_UUID_LIB);$(DIR_GRASSROOTS_UTIL_LIB);$(DIR_MONGODB_LIB);$(DIR_BSON_LIB);$(DIR_JANSSON_LIB)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>copy $(OutDir)$(TargetName)$(TargetExt) d:\grassroots\$(Configuration)\$(Platform)</Command>
@@ -129,12 +137,12 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>$(GrassrootsExtrasDir)\curl\include;D:\projects\grassroots\core\shared\network\include;D:\projects\grassroots\core\shared\util\include\io;D:\projects\grassroots\core\shared\util\include\containers;D:\projects\libbson\include;D:\projects\grassroots\libs\frictionless\include;D:\projects\grassroots\core\shared\util\include;$(GrassrootsExtrasDir)\mongodb-c\include\bson;$(GrassrootsExtrasDir)\jansson\include;..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include;$(DIR_CURL_INC);$(DIR_MONGODB_INC);$(DIR_BSON_INC);$(DIR_JANSSON_INC);$(DIR_GRASSROOTS_NETWORK_INC);$(DIR_GRASSROOTS_UTIL_INC);$(DIR_GRASSROOTS_UTIL_INC)\containers;$(DIR_GRASSROOTS_UTIL_INC)\io;$(DIR_GRASSROOTS_FRICTIONLESS_INC)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>;WINDOWS;SHARED_LIBRARY; _CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>grassroots_util.lib;grassroots_network.lib;jansson.lib;grassroots_fd.lib;grassroots_uuid.lib;libcurl_imp.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>..\..\..\..\libs\frictionless\build\windows\$(Platform)\$(Configuration);$(GrassrootsExtrasDir)\curl\lib;$(GrassrootsExtrasDir)\jansson\lib;..\..\..\..\core\shared\util\build\windows\$(Platform)\$(Configuration);..\..\..\..\core\shared\uuid\build\windows\$(Platform)\$(Configuration);..\..\..\..\core\shared\network\build\windows\$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>$(CURL_LIB_NAME);$(JANSSON_LIB_NAME);$(BSON_LIB_NAME);$(MONGODB_LIB_NAME);$(GRASSROOTS_UUID_LIB_NAME);$(GRASSROOTS_FRICTIONLESS_LIB_NAME);$(GRASSROOTS_NETWORK_LIB_NAME);$(GRASSROOTS_UTIL_LIB_NAME);libcurl_imp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(DIR_CURL_LIB);$(DIR_GRASSROOTS_FRICTIONLESS_LIB);$(DIR_GRASSROOTS_NETWORK_LIB);$(DIR_GRASSROOTS_UUID_LIB);$(DIR_GRASSROOTS_UTIL_LIB);$(DIR_MONGODB_LIB);$(DIR_BSON_LIB);$(DIR_JANSSON_LIB)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>copy $(OutDir)$(TargetName)$(TargetExt) d:\grassroots\$(Configuration)\$(Platform)</Command>
@@ -142,12 +150,12 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>$(GrassrootsExtrasDir)\curl\include;D:\projects\grassroots\core\shared\network\include;D:\projects\grassroots\core\shared\util\include\io;D:\projects\grassroots\core\shared\util\include\containers;D:\projects\libbson\include;D:\projects\grassroots\libs\frictionless\include;D:\projects\grassroots\core\shared\util\include;$(GrassrootsExtrasDir)\mongodb-c\include\bson;$(GrassrootsExtrasDir)\jansson\include;..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include;$(DIR_CURL_INC);$(DIR_MONGODB_INC);$(DIR_BSON_INC);$(DIR_JANSSON_INC);$(DIR_GRASSROOTS_NETWORK_INC);$(DIR_GRASSROOTS_UTIL_INC);$(DIR_GRASSROOTS_UTIL_INC)\containers;$(DIR_GRASSROOTS_UTIL_INC)\io;$(DIR_GRASSROOTS_FRICTIONLESS_INC)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>;WINDOWS;SHARED_LIBRARY; _CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>grassroots_util.lib;grassroots_network.lib;jansson.lib;grassroots_fd.lib;grassroots_uuid.lib;libcurl_imp.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>..\..\..\..\libs\frictionless\build\windows\$(Platform)\$(Configuration);$(GrassrootsExtrasDir)\curl\lib;$(GrassrootsExtrasDir)\jansson\lib;..\..\..\..\core\shared\util\build\windows\$(Platform)\$(Configuration);..\..\..\..\core\shared\uuid\build\windows\$(Platform)\$(Configuration);..\..\..\..\core\shared\network\build\windows\$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>$(CURL_LIB_NAME);$(JANSSON_LIB_NAME);$(BSON_LIB_NAME);$(MONGODB_LIB_NAME);$(GRASSROOTS_UUID_LIB_NAME);$(GRASSROOTS_FRICTIONLESS_LIB_NAME);$(GRASSROOTS_NETWORK_LIB_NAME);$(GRASSROOTS_UTIL_LIB_NAME);libcurl_imp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(DIR_CURL_LIB);$(DIR_GRASSROOTS_FRICTIONLESS_LIB);$(DIR_GRASSROOTS_NETWORK_LIB);$(DIR_GRASSROOTS_UUID_LIB);$(DIR_GRASSROOTS_UTIL_LIB);$(DIR_MONGODB_LIB);$(DIR_BSON_LIB);$(DIR_JANSSON_LIB)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>copy $(OutDir)$(TargetName)$(TargetExt) d:\grassroots\$(Configuration)\$(Platform)</Command>
