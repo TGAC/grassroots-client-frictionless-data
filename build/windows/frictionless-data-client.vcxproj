@@ -96,7 +96,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions);WINDOWS;WINDOWS;SHARED_LIBRARY; _CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>HAVE_STDBOOL_H;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions);WINDOWS;WINDOWS;SHARED_LIBRARY; _CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
@@ -116,7 +116,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions);WINDOWS;WINDOWS;SHARED_LIBRARY; _CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>HAVE_STDBOOL_H;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions);WINDOWS;WINDOWS;SHARED_LIBRARY; _CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
@@ -138,7 +138,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <AdditionalIncludeDirectories>..\..\include;$(DIR_CURL_INC);$(DIR_MONGODB_INC);$(DIR_BSON_INC);$(DIR_JANSSON_INC);$(DIR_GRASSROOTS_NETWORK_INC);$(DIR_GRASSROOTS_UTIL_INC);$(DIR_GRASSROOTS_UTIL_INC)\containers;$(DIR_GRASSROOTS_UTIL_INC)\io;$(DIR_GRASSROOTS_FRICTIONLESS_INC)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>;WINDOWS;SHARED_LIBRARY; _CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>HAVE_STDBOOL_H;;WINDOWS;SHARED_LIBRARY; _CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <AdditionalDependencies>$(CURL_LIB_NAME);$(JANSSON_LIB_NAME);$(BSON_LIB_NAME);$(MONGODB_LIB_NAME);$(GRASSROOTS_UUID_LIB_NAME);$(GRASSROOTS_FRICTIONLESS_LIB_NAME);$(GRASSROOTS_NETWORK_LIB_NAME);$(GRASSROOTS_UTIL_LIB_NAME);libcurl_imp.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -151,7 +151,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <AdditionalIncludeDirectories>..\..\include;$(DIR_CURL_INC);$(DIR_MONGODB_INC);$(DIR_BSON_INC);$(DIR_JANSSON_INC);$(DIR_GRASSROOTS_NETWORK_INC);$(DIR_GRASSROOTS_UTIL_INC);$(DIR_GRASSROOTS_UTIL_INC)\containers;$(DIR_GRASSROOTS_UTIL_INC)\io;$(DIR_GRASSROOTS_FRICTIONLESS_INC)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>;WINDOWS;SHARED_LIBRARY; _CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>HAVE_STDBOOL_H;;WINDOWS;SHARED_LIBRARY; _CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <AdditionalDependencies>$(CURL_LIB_NAME);$(JANSSON_LIB_NAME);$(BSON_LIB_NAME);$(MONGODB_LIB_NAME);$(GRASSROOTS_UUID_LIB_NAME);$(GRASSROOTS_FRICTIONLESS_LIB_NAME);$(GRASSROOTS_NETWORK_LIB_NAME);$(GRASSROOTS_UTIL_LIB_NAME);libcurl_imp.lib;%(AdditionalDependencies)</AdditionalDependencies>
